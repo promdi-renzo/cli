@@ -6,7 +6,7 @@ import * as shell from "shelljs";
 import * as Listr from "listr";
 import * as fs from "fs";
 
-const NPM = path.join(__dirname, "../package.json");
+const NPM = path.join(__dirname, "package.json");
 
 import(NPM)
   .then(runCLI)
