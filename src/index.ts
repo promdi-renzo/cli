@@ -53,16 +53,14 @@ function create() {
 function gitClone(dir: string) {
   const sample = `git clone https://github.com/mayajs/sample.git ${dir}`;
   if (shell.exec(sample).code !== 0) {
-    shell.echo("Error: Git clone failed");
-    shell.exit(1);
+    throw new Error("Error: Git clone failed");
   }
   shell.cd(dir);
 }
 
 function installDependency() {
   if (shell.exec("npm i").code !== 0) {
-    shell.echo("Error: npm install failed");
-    shell.exit(1);
+    throw new Error("Error: npm install failed");
   }
 }
 
@@ -81,7 +79,8 @@ function updateJson(dir: string) {
     const NEW_DATA = JSON.stringify(data);
     fs.writeFileSync(PACKAGE_JSON, NEW_DATA);
   } catch (error) {
-    console.log(error);
+    const PROJECT_DIR = path.resolve(process.cwd(), `../${dir}`);
+    fs.unlinkSync(PROJECT_DIR);
   }
 }
 
