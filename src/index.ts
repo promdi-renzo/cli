@@ -25,11 +25,25 @@ function create() {
     .description("Create a MayaJS project")
     .action((dir: any) => {
       // Clone git repo for sample template
-      const sample = `git clone https://github.com/mayajs/sample.git ${dir}`;
-      if (shell.exec(sample).code !== 0) {
-        shell.echo("Error: Git clone failed");
-        shell.exit(1);
-      }
+      gitClone(dir);
+      installDependency();
       // Update sample templates package.json
     });
+}
+
+function gitClone(dir: string) {
+  const sample = `git clone https://github.com/mayajs/sample.git ${dir}`;
+  if (shell.exec(sample).code !== 0) {
+    shell.echo("Error: Git clone failed");
+    shell.exit(1);
+  }
+  shell.cd(dir);
+}
+
+function installDependency() {
+  shell.echo("Installing dependencies");
+  if (shell.exec("npm i loglevel=verbose").code !== 0) {
+    shell.echo("Error: npm install failed");
+    shell.exit(1);
+  }
 }
