@@ -10,7 +10,7 @@
     "access": "public"
   },
   "scripts": {
-    "start": "tsc"
+    "start": "shx rm -rf dist && wait-on -r index.js && tsc -w"
   },
   "repository": {
     "type": "git",
@@ -26,10 +26,15 @@
     "url": "https://github.com/mayajs/cli/issues"
   },
   "homepage": "https://github.com/mayajs/cli#readme",
+  "dependencies": {
+    "yargs": "^14.0.0"
+  },
   "devDependencies": {
     "@types/node": "^12.7.2",
+    "@types/yargs": "^13.0.2",
     "shx": "^0.3.2",
     "ts-node": "^8.3.0",
-    "typescript": "^3.5.3"
+    "typescript": "^3.5.3",
+    "wait-on": "^3.3.0"
   }
 }
