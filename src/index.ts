@@ -3,11 +3,12 @@
 import * as program from "commander";
 import * as path from "path";
 import * as shell from "shelljs";
+import * as Listr from "listr";
+import * as fs from "fs";
 
-// const packageJSON = path.resolve(process.cwd(), "package.json");
-const mainJSON = path.join(__dirname, "../package.json");
+const NPM = path.join(__dirname, "../package.json");
 
-import(mainJSON)
+import(NPM)
   .then(runCLI)
   .catch(error => console.log(error));
 
@@ -24,10 +25,24 @@ function create() {
     .command("new <directory>")
     .description("Create a MayaJS project")
     .action((dir: any) => {
-      // Clone git repo for sample template
-      gitClone(dir);
-      installDependency();
-      // Update sample templates package.json
+      const tasks = new Listr([
+        {
+          title: "Copying files",
+          task: () => gitClone(dir),
+        },
+        {
+          title: "Updating package.json",
+          task: () => updateJson(dir),
+        },
+        {
+          title: "Installing dependencies",
+          task: () => installDependency(),
+        },
+      ]);
+
+      tasks.run().catch((err: any) => {
+        console.error(err);
+      });
     });
 }
 
@@ -41,9 +56,27 @@ function gitClone(dir: string) {
 }
 
 function installDependency() {
-  shell.echo("Installing dependencies");
-  if (shell.exec("npm i loglevel=verbose").code !== 0) {
+  if (shell.exec("npm i").code !== 0) {
     shell.echo("Error: npm install failed");
     shell.exit(1);
+  }
+}
+
+function updateJson(dir: string) {
+  try {
+    const PACKAGE_JSON = path.resolve(process.cwd(), "package.json");
+    const rawdata = fs.readFileSync(PACKAGE_JSON);
+    let data = JSON.parse(rawdata.toString());
+    data.name = dir;
+    data.author = "";
+    data.keywords = ["mayajs"];
+    data.version = "1.0.0";
+    delete data.bugs;
+    delete data.homepage;
+    delete data.repository;
+    const NEW_DATA = JSON.stringify(data);
+    fs.writeFileSync(PACKAGE_JSON, NEW_DATA);
+  } catch (error) {
+    console.log(error);
   }
 }
