@@ -1,0 +1,46 @@
+{
+  "name": "@mayajs/cli",
+  "version": "0.1.0",
+  "description": "MayaJS Command Line Interface",
+  "main": "index.js",
+  "files": ["index.js"],
+  "bin": {
+    "maya": "./index.js"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "clean": "shx rm -rf index.js && shx rm -rf *.tgz",
+    "start": "npm run clean && wait-on -r index.js && tsc -w",
+    "prepack": "npm run clean && wait-on -r index.js && tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mayajs/cli.git"
+  },
+  "keywords": [
+    "cli",
+    "mayajs"
+  ],
+  "author": "Mark Anthony C. Ignacio",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mayajs/cli/issues"
+  },
+  "homepage": "https://github.com/mayajs/cli#readme",
+  "dependencies": {
+    "commander": "^3.0.0",
+    "listr": "^0.14.3",
+    "shelljs": "^0.8.3"
+  },
+  "devDependencies": {
+    "@types/listr": "^0.14.2",
+    "@types/node": "^12.7.2",
+    "@types/shelljs": "^0.8.5",
+    "shx": "^0.3.2",
+    "ts-node": "^8.3.0",
+    "typescript": "^3.5.3",
+    "wait-on": "^3.3.0"
+  }
+}
