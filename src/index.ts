@@ -31,6 +31,10 @@ function create() {
           task: () => gitClone(dir),
         },
         {
+          title: "Removing git folder",
+          task: () => removeGit(),
+        },
+        {
           title: "Updating package.json",
           task: () => updateJson(dir),
         },
@@ -79,4 +83,9 @@ function updateJson(dir: string) {
   } catch (error) {
     console.log(error);
   }
+}
+
+function removeGit() {
+  const gitFolder = path.resolve(process.cwd(), ".git");
+  shell.rm("-rf", gitFolder);
 }
