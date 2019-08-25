@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "MayaJS Command Line Interface",
   "main": "index.js",
+  "files": ["index.js"],
   "bin": {
     "maya": "./index.js"
   },
@@ -10,7 +11,9 @@
     "access": "public"
   },
   "scripts": {
-    "start": "shx rm -rf index.js && wait-on -r index.js && tsc -w"
+    "clean": "shx rm -rf index.js && shx rm -rf *.tgz",
+    "start": "npm run clean && wait-on -r index.js && tsc -w",
+    "prepack": "npm run clean && wait-on -r index.js && tsc"
   },
   "repository": {
     "type": "git",
