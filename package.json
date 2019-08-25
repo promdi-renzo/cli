@@ -2,15 +2,15 @@
   "name": "@mayajs/cli",
   "version": "0.1.0",
   "description": "MayaJS Command Line Interface",
-  "main": "dist/index.js",
+  "main": "index.js",
   "bin": {
-    "maya": "./dist/index.js"
+    "maya": "./index.js"
   },
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
-    "start": "shx rm -rf dist && wait-on -r index.js && tsc -w"
+    "start": "shx rm -rf index.js && wait-on -r index.js && tsc -w"
   },
   "repository": {
     "type": "git",
