@@ -6,13 +6,18 @@ import * as path from "path";
 // TASKS
 import { createProject } from "./lib/task";
 
+interface NpmPackage {
+  version: string;
+  description: string;
+}
+
 const NPM = path.join(__dirname, "package.json");
 
 import(NPM)
   .then(runCLI)
   .catch(error => console.log(error));
 
-function runCLI(npm: any) {
+function runCLI(npm: NpmPackage) {
   program
     .version(npm.version)
     .option("new <directory>, n <directory>", "Creates a new mayajs project based on the directory.")
