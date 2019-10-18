@@ -1,40 +1,8 @@
-import * as program from "commander";
 import * as path from "path";
 import * as shell from "shelljs";
-import * as Listr from "listr";
 import * as fs from "fs";
 
-export function create() {
-  program
-    .command("new <directory>")
-    .description("Create a MayaJS project")
-    .action((dir: any) => {
-      const tasks = new Listr([
-        {
-          title: "Copying files",
-          task: () => gitClone(dir),
-        },
-        {
-          title: "Removing git folder",
-          task: () => removeGit(),
-        },
-        {
-          title: "Updating package.json",
-          task: () => updateJson(dir),
-        },
-        {
-          title: "Installing dependencies",
-          task: () => installDependency(),
-        },
-      ]);
-
-      tasks.run().catch((err: any) => {
-        console.error(err);
-      });
-    });
-}
-
-function gitClone(dir: string) {
+export function gitClone(dir: string) {
   const sample = `git clone https://github.com/mayajs/sample.git ${dir}`;
   if (shell.exec(sample).code !== 0) {
     throw new Error("Error: Git clone failed");
@@ -42,13 +10,13 @@ function gitClone(dir: string) {
   shell.cd(dir);
 }
 
-function installDependency() {
+export function installDependency() {
   if (shell.exec("npm i").code !== 0) {
     throw new Error("Error: npm install failed");
   }
 }
 
-function updateJson(dir: string) {
+export function updateJson(dir: string) {
   try {
     const PACKAGE_JSON = path.resolve(process.cwd(), "package.json");
     const rawdata = fs.readFileSync(PACKAGE_JSON);
@@ -68,7 +36,7 @@ function updateJson(dir: string) {
   }
 }
 
-function removeGit() {
+export function removeGit() {
   const gitFolder = path.resolve(process.cwd(), ".git");
   shell.rm("-rf", gitFolder);
 }
