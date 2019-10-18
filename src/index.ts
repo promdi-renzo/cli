@@ -2,8 +2,9 @@
 
 import * as program from "commander";
 import * as path from "path";
-import * as Listr from "listr";
-import { gitClone, removeGit, updateJson, installDependency } from "./lib/create";
+
+// TASKS
+import { createProject } from "./lib/task";
 
 const NPM = path.join(__dirname, "package.json");
 
@@ -21,30 +22,7 @@ function runCLI(npm: any) {
     .command("new <directory>")
     .alias("n")
     .description("Create a MayaJS project")
-    .action((dir: any) => {
-      const tasks = new Listr([
-        {
-          title: "Copying files",
-          task: () => gitClone(dir),
-        },
-        {
-          title: "Removing git folder",
-          task: () => removeGit(),
-        },
-        {
-          title: "Updating package.json",
-          task: () => updateJson(dir),
-        },
-        {
-          title: "Installing dependencies",
-          task: () => installDependency(),
-        },
-      ]);
-
-      tasks.run().catch((err: any) => {
-        console.error(err);
-      });
-    });
+    .action(createProject);
 
   program.parse(process.argv);
 }
