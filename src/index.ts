@@ -12,10 +12,14 @@ import(NPM)
   .catch(error => console.log(error));
 
 function runCLI(npm: any) {
-  program.version(npm.version).description(npm.description);
+  program
+    .version(npm.version)
+    .option("new <directory>, n <directory>", "Creates a new mayajs project based on the directory.")
+    .description(npm.description);
 
   program
     .command("new <directory>")
+    .alias("n")
     .description("Create a MayaJS project")
     .action((dir: any) => {
       const tasks = new Listr([
