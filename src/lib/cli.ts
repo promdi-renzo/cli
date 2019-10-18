@@ -12,13 +12,14 @@ interface NpmPackage {
 export default function runCLI(npm: NpmPackage) {
   program
     .version(npm.version)
-    .option("new <directory>, n <directory>", "Creates a new mayajs project based on the directory.")
+    .name("maya")
+    .usage("[options | command] [arguments]")
     .description(npm.description);
 
   program
     .command("new <directory>")
     .alias("n")
-    .description("Create a MayaJS project")
+    .description("Creates a new MayaJS project based on the directory.")
     .action(createProject);
 
   program.parse(process.argv);
