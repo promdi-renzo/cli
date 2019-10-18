@@ -13,7 +13,7 @@
     "access": "public"
   },
   "scripts": {
-    "clean": "shx rm -rf index.js && shx rm -rf *.tgz",
+    "clean": "rimraf index.js && rimraf *.tgz",
     "start": "npm run clean && wait-on -r index.js && tsc -w",
     "prepack": "npm run clean && wait-on -r index.js && tsc"
   },
