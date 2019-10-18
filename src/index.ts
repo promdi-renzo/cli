@@ -2,9 +2,7 @@
 
 import * as program from "commander";
 import * as path from "path";
-import * as shell from "shelljs";
-import * as Listr from "listr";
-import * as fs from "fs";
+import { create } from "./lib/create";
 
 const NPM = path.join(__dirname, "package.json");
 
@@ -18,73 +16,4 @@ function runCLI(npm: any) {
   create();
 
   program.parse(process.argv);
-}
-
-function create() {
-  program
-    .command("new <directory>")
-    .description("Create a MayaJS project")
-    .action((dir: any) => {
-      const tasks = new Listr([
-        {
-          title: "Copying files",
-          task: () => gitClone(dir),
-        },
-        {
-          title: "Removing git folder",
-          task: () => removeGit(),
-        },
-        {
-          title: "Updating package.json",
-          task: () => updateJson(dir),
-        },
-        {
-          title: "Installing dependencies",
-          task: () => installDependency(),
-        },
-      ]);
-
-      tasks.run().catch((err: any) => {
-        console.error(err);
-      });
-    });
-}
-
-function gitClone(dir: string) {
-  const sample = `git clone https://github.com/mayajs/sample.git ${dir}`;
-  if (shell.exec(sample).code !== 0) {
-    throw new Error("Error: Git clone failed");
-  }
-  shell.cd(dir);
-}
-
-function installDependency() {
-  if (shell.exec("npm i").code !== 0) {
-    throw new Error("Error: npm install failed");
-  }
-}
-
-function updateJson(dir: string) {
-  try {
-    const PACKAGE_JSON = path.resolve(process.cwd(), "package.json");
-    const rawdata = fs.readFileSync(PACKAGE_JSON);
-    let data = JSON.parse(rawdata.toString());
-    data.name = dir;
-    data.author = "";
-    data.keywords = ["mayajs"];
-    data.version = "1.0.0";
-    delete data.bugs;
-    delete data.homepage;
-    delete data.repository;
-    const NEW_DATA = JSON.stringify(data);
-    fs.writeFileSync(PACKAGE_JSON, NEW_DATA);
-  } catch (error) {
-    const PROJECT_DIR = path.resolve(process.cwd(), `../${dir}`);
-    fs.unlinkSync(PROJECT_DIR);
-  }
-}
-
-function removeGit() {
-  const gitFolder = path.resolve(process.cwd(), ".git");
-  shell.rm("-rf", gitFolder);
 }
