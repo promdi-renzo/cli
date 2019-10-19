@@ -4,7 +4,7 @@
   "description": "MayaJS Command Line Interface",
   "main": "index.js",
   "files": [
-    "index.js"
+    "index.js", "lib", "files"
   ],
   "bin": {
     "maya": "./index.js"
