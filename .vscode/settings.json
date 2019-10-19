@@ -1,0 +1,16 @@
+{
+  "prettier.printWidth": 160,
+  "prettier.tabWidth": 2,
+  "prettier.trailingComma": "es5",
+  "prettier.bracketSpacing": true,
+  "eslint.autoFixOnSave": true,
+  "eslint.alwaysShowStatus": true,
+  "eslint.run": "onSave",
+  "eslint.enable": true,
+  "eslint.workingDirectories": [
+    "./src"
+  ],
+  "eslint.options": {
+    "configFile": "./.eslintrc.json"
+  }
+}
