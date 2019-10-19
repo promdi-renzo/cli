@@ -20,7 +20,7 @@ export function updateJson(dir: string) {
   try {
     const PACKAGE_JSON = path.resolve(process.cwd(), "package.json");
     const rawdata = fs.readFileSync(PACKAGE_JSON);
-    let data = JSON.parse(rawdata.toString());
+    const data = JSON.parse(rawdata.toString());
     data.name = dir;
     data.author = "";
     data.keywords = ["mayajs"];
