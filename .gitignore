@@ -9,6 +9,9 @@ yarn-error.log*
 *.js
 *.d.ts
 
+# Add eslint
+!.eslintrc.js
+
 # Runtime data
 pids
 *.pid
