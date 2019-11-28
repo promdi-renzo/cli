@@ -22,7 +22,7 @@ export default function runCLI(npm: NpmPackage) {
   program
     .command("new <directory>")
     .alias("n")
-    .description("Creates a new MayaJS project based on the directory.")
+    .description(`Creates a new MayaJS project based on the directory.\nExample: ${chalk.green("maya new my-new-app")}`)
     .action(createProject);
 
   program.parse(process.argv);
