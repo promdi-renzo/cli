@@ -16,4 +16,30 @@ const readme = {
   ],
 };
 
-export { index, readme };
+const packageJSON = {
+  name: "",
+  version: "1.0.0",
+  description: "#name MayaJS Project",
+  main: "index.js",
+  scripts: {
+    start: "nodemon --exec ts-node src/index.ts",
+  },
+  author: "",
+  keywords: ["mayajs"],
+  dependencies: {
+    "@mayajs/core": "0.3.0",
+    "@mayajs/mongo": "0.1.0",
+  },
+  devDependencies: {
+    "@types/dotenv": "^6.1.1",
+    "@types/express": "^4.17.0",
+    "@types/mongoose": "^5.5.13",
+    "@types/mongoose-paginate": "^5.0.6",
+    "@types/node": "^12.7.1",
+    "ts-node": "^8.4.1",
+    nodemon: "^1.19.3",
+    typescript: "^3.5.3",
+  },
+};
+
+export { index, readme, packageJSON };
