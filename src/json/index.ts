@@ -95,4 +95,16 @@ const controller = {
   ],
 };
 
-export { index, readme, packageJSON, tsConfig, appModule, routing, controller };
+const model = {
+  imports: ['import { Schema, model } from "mongoose";', 'import paginate from "mongoose-paginate";'],
+  schema: {
+    name: {
+      required: [true, "Name is required."],
+      type: String,
+      unique: true,
+    },
+  },
+  body: ["schema.plugin(paginate);", 'export default model("Sample", schema);'],
+};
+
+export { index, readme, packageJSON, tsConfig, appModule, routing, controller, model };
