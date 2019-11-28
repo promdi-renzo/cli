@@ -122,3 +122,9 @@ export function createAppRoutingModule(appName: any) {
 
   fs.writeFileSync(workingDirectory + "/app.routing.module.ts", data);
 }
+
+export function createEnvironment(appName: any) {
+  const workingDirectory = checkCurrentDirectory(appName + "/src/environments");
+  const data = ["export const environment = {", " production: false,", "};"].join("\n");
+  fs.writeFileSync(workingDirectory + "/index.ts", data);
+}
