@@ -1,12 +1,28 @@
 import * as path from "path";
 import * as shell from "shelljs";
 import * as fs from "fs";
-import { index } from "../json";
+import { index, readme } from "../json";
 
-export function createIndex() {
+export function checkCurrentDirectory(name: string) {
+  createDirectory(path.resolve(process.cwd(), `./${name}`));
+}
+
+export function createDirectory(path: string) {
+  if (!fs.existsSync(path)) {
+    fs.mkdirSync(path);
+  }
+}
+
+export function createIndex(directory: string) {
   const imports = index.imports.map(imp => imp + "\n").join("");
   const contents = index.content.map(content => "\n" + content).join("");
-  fs.writeFileSync("./sample/index.ts", imports + contents);
+  const curDir = path.resolve(process.cwd(), `./${directory}`);
+
+  if (!fs.existsSync(curDir)) {
+    fs.mkdirSync(curDir);
+  }
+
+  fs.writeFileSync(curDir + "/index.ts", imports + contents);
 }
 
 export function gitClone(dir: string) {
@@ -46,4 +62,29 @@ export function updateJson(dir: string) {
 export function removeGit() {
   const gitFolder = path.resolve(process.cwd(), ".git");
   shell.rm("-rf", gitFolder);
+}
+
+export function createReadMe(directory: string) {
+  const PACKAGE_JSON = path.resolve(process.cwd(), "package.json");
+  const rawdata = fs.readFileSync(PACKAGE_JSON);
+  const data = JSON.parse(rawdata.toString());
+  const curDir = path.resolve(process.cwd(), `./${directory}/README.md`);
+
+  const body = Object.keys(readme).map((key: string) => {
+    if (key === "appName") {
+      return `# ${directory}\n\n`;
+    }
+
+    if (key === "description") {
+      return readme[key].replace("#cli-url", data.homepage.replace("#readme", "")).replace("#cli-version", data.version) + "\n\n";
+    }
+
+    if (key === "body") {
+      return readme[key].map(el => el + "\n\n").join("");
+    }
+
+    return;
+  });
+
+  fs.writeFileSync(curDir, body.join(""));
 }
