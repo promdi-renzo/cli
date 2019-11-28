@@ -42,4 +42,19 @@ const packageJSON = {
   },
 };
 
-export { index, readme, packageJSON };
+const tsConfig = {
+  compilerOptions: {
+    target: "ES6",
+    module: "commonjs",
+    lib: ["es5", "es2015", "es2016", "es2017", "esnext"],
+    outDir: "./dist",
+    rootDir: "./src",
+    strict: true,
+    moduleResolution: "node",
+    esModuleInterop: true,
+    experimentalDecorators: true,
+    emitDecoratorMetadata: true,
+  },
+};
+
+export { index, readme, packageJSON, tsConfig };
