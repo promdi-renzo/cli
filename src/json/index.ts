@@ -68,4 +68,11 @@ const appModule = {
   port: 3333,
 };
 
-export { index, readme, packageJSON, tsConfig, appModule };
+const routing = {
+  imports: 'import { SampleController } from "./controllers/sample/sample.controller";',
+  controllers: [],
+  middlewares: [],
+  path: "",
+};
+
+export { index, readme, packageJSON, tsConfig, appModule, routing };
