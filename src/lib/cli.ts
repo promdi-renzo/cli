@@ -1,4 +1,6 @@
 import * as program from "commander";
+import * as figlet from "figlet";
+import * as chalk from "chalk";
 
 // TASKS
 import { createProject } from "./task";
@@ -23,4 +25,9 @@ export default function runCLI(npm: NpmPackage) {
     .action(createProject);
 
   program.parse(process.argv);
+
+  if (program.args.length === 0) {
+    console.log(chalk.red(figlet.textSync("MayaJS", { horizontalLayout: "full" })));
+    program.outputHelp();
+  }
 }
