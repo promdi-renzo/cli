@@ -16,6 +16,7 @@ export default function runCLI(npm: NpmPackage) {
     .version(npm.version)
     .name("maya")
     .usage("[options | command] [arguments]")
+    .option("-v, version", npm.version)
     .description(npm.description);
 
   program
