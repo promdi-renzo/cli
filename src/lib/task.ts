@@ -1,20 +1,30 @@
 import * as Listr from "listr";
-import { createIndex } from "./create";
+import { createIndex, createReadMe, checkCurrentDirectory, createPackageJSON } from "./create";
 
-export const createProject = (dir: string) => {
+export const createProject = (directory: string) => {
   // ✔ Create index.ts
-  // create README.MD
+  // ✔ Create README.MD
   // create package.json
-  // create LICENCE
+  // create .gitignore
   // create app.module.ts
   // create app.routing.module.ts
   // create environments
   // create controllers
 
+  checkCurrentDirectory(directory);
+
   const tasks = new Listr([
     {
-      title: "Creating index.ts",
-      task: () => createIndex(),
+      title: "Create index.ts",
+      task: () => createIndex(directory),
+    },
+    {
+      title: "Create README.MD",
+      task: () => createReadMe(directory),
+    },
+    {
+      title: "Create package.json",
+      task: () => createPackageJSON(directory),
     },
   ]);
 
