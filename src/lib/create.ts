@@ -1,7 +1,7 @@
 import * as path from "path";
 import * as shell from "shelljs";
 import * as fs from "fs";
-import { index, readme, packageJSON, tsConfig, appModule } from "../json";
+import { index, readme, packageJSON, tsConfig, appModule, routing } from "../json";
 
 export function checkCurrentDirectory(name: string) {
   const curDir = getCurrentDirectory(name);
@@ -97,4 +97,28 @@ export function createAppModule(appName: any) {
 
   const data = imports + decorator + "export class AppModule {}";
   fs.writeFileSync(workingDirectory + "/app.module.ts", data);
+}
+
+export function createAppRoutingModule(appName: any) {
+  const workingDirectory = checkCurrentDirectory(appName + "/src");
+  const imports = routing.imports;
+  delete routing.imports;
+
+  const body = Object.keys(routing)
+    .map(key => {
+      if (key === "controllers") {
+        return `${key} : [SampleController]`;
+      }
+
+      if (key === "middlewares") {
+        return `${key} : []`;
+      }
+
+      return `${key} : ""`;
+    })
+    .join(",\n  ");
+  const routes = `\n\nexport const routes = [\n  ${body}\n];`;
+  const data = imports + routes;
+
+  fs.writeFileSync(workingDirectory + "/app.routing.module.ts", data);
 }
