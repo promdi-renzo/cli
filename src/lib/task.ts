@@ -1,5 +1,14 @@
 import * as Listr from "listr";
-import { createIndex, createReadMe, checkCurrentDirectory, createPackageJSON, createGitIgnore, createTsConfig, createAppModule } from "./create";
+import {
+  createIndex,
+  createReadMe,
+  checkCurrentDirectory,
+  createPackageJSON,
+  createGitIgnore,
+  createTsConfig,
+  createAppModule,
+  createAppRoutingModule,
+} from "./create";
 
 export const createProject = (directory: string) => {
   // ✔ Create index.ts
@@ -8,7 +17,7 @@ export const createProject = (directory: string) => {
   // ✔ Create .gitignore
   // ✔ Create tsconfig.json
   // ✔ Create app.module.ts
-  // create app.routing.module.ts
+  // ✔ Create app.routing.module.ts
   // create environments
   // create controllers
 
@@ -16,11 +25,12 @@ export const createProject = (directory: string) => {
 
   const tasks = new Listr([
     { title: "Create index.ts", task: createIndex },
-    { title: "Create README.MD", task: createReadMe },
+    { title: "Create README.md", task: createReadMe },
     { title: "Create package.json", task: createPackageJSON },
     { title: "Create .gitignore", task: createGitIgnore },
     { title: "Create tsconfig.json", task: createTsConfig },
     { title: "Create app.module.ts", task: createAppModule },
+    { title: "Create app.routing.module.ts", task: createAppRoutingModule },
   ]);
 
   tasks.run(directory).catch((err: any) => {
