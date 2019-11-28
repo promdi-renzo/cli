@@ -1,7 +1,7 @@
 import * as path from "path";
 import * as shell from "shelljs";
 import * as fs from "fs";
-import { index, readme, packageJSON, tsConfig, appModule, routing } from "../json";
+import { index, readme, packageJSON, tsConfig, appModule, routing, controller } from "../json";
 
 export function checkCurrentDirectory(name: string) {
   const curDir = getCurrentDirectory(name);
@@ -127,4 +127,36 @@ export function createEnvironment(appName: any) {
   const workingDirectory = checkCurrentDirectory(appName + "/src/environments");
   const data = ["export const environment = {", " production: false,", "};"].join("\n");
   fs.writeFileSync(workingDirectory + "/index.ts", data);
+}
+
+export function createController(appName: any) {
+  const workingDirectory = checkCurrentDirectory(appName + "/src/controllers");
+  createControllerTs(workingDirectory, "sample");
+}
+
+function createControllerTs(directory: string, name: string) {
+  const imports = controller.imports.join("\n");
+  const decorator =
+    "@Controller(" +
+    JSON.stringify(controller["decorator"], null, 2)
+      .replace(/\"model\"/g, "model")
+      .replace(/\"route\"/g, "route")
+      .replace(/#name/g, name) +
+    ")";
+  const body = controller["body"]
+    .map((val: string, index: number) => {
+      if (index <= 1) {
+        val += "\n";
+      }
+
+      if (index >= 1 && index < 5) {
+        const spaces = "  ";
+        val = (index === 4 ? spaces + spaces : spaces) + val;
+      }
+
+      return val;
+    })
+    .join("\n");
+  const data = imports + "\n\n" + decorator + "\n" + body;
+  fs.writeFileSync(directory + `/${name}.controller.ts`, data);
 }
