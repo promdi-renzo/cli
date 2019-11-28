@@ -1,7 +1,7 @@
 import * as path from "path";
 import * as shell from "shelljs";
 import * as fs from "fs";
-import { index, readme, packageJSON, tsConfig } from "../json";
+import { index, readme, packageJSON, tsConfig, appModule } from "../json";
 
 export function checkCurrentDirectory(name: string) {
   const curDir = getCurrentDirectory(name);
@@ -83,4 +83,18 @@ export function createGitIgnore(appName: string) {
 
 export function createTsConfig(appName: string) {
   fs.writeFileSync(getCurrentDirectory(appName) + "/tsconfig.json", JSON.stringify(tsConfig, null, 2));
+}
+
+export function createAppModule(appName: any) {
+  const workingDirectory = checkCurrentDirectory(appName + "/src");
+  const imports = appModule.imports.map(val => val + "\n").join("") + "\n";
+  const { cors, logs, database: db, port } = appModule;
+  const decorator = `@App(${JSON.stringify({ cors, logs, port, database: db }, null, 2)})\n`
+    .replace(/\"/g, "")
+    .replace("#url", '"your-connection-string-here"')
+    .replace("database: ", "database: Mongo(")
+    .replace("}\n})", "}),\n  routes\n})");
+
+  const data = imports + decorator + "export class AppModule {}";
+  fs.writeFileSync(workingDirectory + "/app.module.ts", data);
 }
