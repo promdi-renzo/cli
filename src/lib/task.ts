@@ -8,6 +8,7 @@ import {
   createTsConfig,
   createAppModule,
   createAppRoutingModule,
+  createEnvironment,
 } from "./create";
 
 export const createProject = (directory: string) => {
@@ -18,7 +19,7 @@ export const createProject = (directory: string) => {
   // ✔ Create tsconfig.json
   // ✔ Create app.module.ts
   // ✔ Create app.routing.module.ts
-  // create environments
+  // ✔ Create environments
   // create controllers
 
   checkCurrentDirectory(directory);
@@ -31,6 +32,7 @@ export const createProject = (directory: string) => {
     { title: "Create tsconfig.json", task: createTsConfig },
     { title: "Create app.module.ts", task: createAppModule },
     { title: "Create app.routing.module.ts", task: createAppRoutingModule },
+    { title: "Create environment", task: createEnvironment },
   ]);
 
   tasks.run(directory).catch((err: any) => {
