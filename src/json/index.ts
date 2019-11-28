@@ -57,4 +57,15 @@ const tsConfig = {
   },
 };
 
-export { index, readme, packageJSON, tsConfig };
+const appModule = {
+  imports: ['import { App } from "@mayajs/core";', 'import { Mongo } from "@mayajs/mongo";', 'import { routes } from "./app.routing.module";'],
+  cors: true,
+  logs: true,
+  database: {
+    connectionString: "#url",
+    options: { useCreateIndex: true, useNewUrlParser: true, useFindAndModify: false },
+  },
+  port: 3333,
+};
+
+export { index, readme, packageJSON, tsConfig, appModule };
