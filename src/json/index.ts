@@ -75,4 +75,24 @@ const routing = {
   path: "",
 };
 
-export { index, readme, packageJSON, tsConfig, appModule, routing };
+const controller = {
+  imports: [
+    'import { Get, Patch, Post, Delete, Put } from "@mayajs/common";',
+    'import { Request, Response, NextFunction } from "express";',
+    'import { Controller} from "@mayajs/core";',
+  ],
+  decorator: {
+    model: "./#name.model",
+    route: "/#name",
+  },
+  body: [
+    "export class SampleController {",
+    "constructor() {}",
+    '@Get({ path: "/", middlewares: [] })',
+    "get(req: Request, res: Response, next: NextFunction): void {",
+    'res.send("Hello world!");\n  }',
+    "}",
+  ],
+};
+
+export { index, readme, packageJSON, tsConfig, appModule, routing, controller };
