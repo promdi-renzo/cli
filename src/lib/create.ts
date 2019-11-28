@@ -1,6 +1,13 @@
 import * as path from "path";
 import * as shell from "shelljs";
 import * as fs from "fs";
+import { index } from "../json";
+
+export function createIndex() {
+  const imports = index.imports.map(imp => imp + "\n").join("");
+  const contents = index.content.map(content => "\n" + content).join("");
+  fs.writeFileSync("./sample/index.ts", imports + contents);
+}
 
 export function gitClone(dir: string) {
   const sample = `git clone https://github.com/mayajs/sample.git ${dir}`;
