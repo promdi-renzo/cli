@@ -1,10 +1,12 @@
 import * as path from "path";
 import * as shell from "shelljs";
 import * as fs from "fs";
-import { index, readme } from "../json";
+import { index, readme, packageJSON } from "../json";
 
 export function checkCurrentDirectory(name: string) {
-  createDirectory(path.resolve(process.cwd(), `./${name}`));
+  const curDir = getCurrentDirectory(name);
+  createDirectory(curDir);
+  return curDir;
 }
 
 export function createDirectory(path: string) {
@@ -13,16 +15,14 @@ export function createDirectory(path: string) {
   }
 }
 
+export function getCurrentDirectory(name: string) {
+  return path.resolve(process.cwd(), `./${name}`);
+}
+
 export function createIndex(directory: string) {
   const imports = index.imports.map(imp => imp + "\n").join("");
   const contents = index.content.map(content => "\n" + content).join("");
-  const curDir = path.resolve(process.cwd(), `./${directory}`);
-
-  if (!fs.existsSync(curDir)) {
-    fs.mkdirSync(curDir);
-  }
-
-  fs.writeFileSync(curDir + "/index.ts", imports + contents);
+  fs.writeFileSync(getCurrentDirectory(directory) + "/index.ts", imports + contents);
 }
 
 export function gitClone(dir: string) {
@@ -39,26 +39,6 @@ export function installDependency() {
   }
 }
 
-export function updateJson(dir: string) {
-  try {
-    const PACKAGE_JSON = path.resolve(process.cwd(), "package.json");
-    const rawdata = fs.readFileSync(PACKAGE_JSON);
-    const data = JSON.parse(rawdata.toString());
-    data.name = dir;
-    data.author = "";
-    data.keywords = ["mayajs"];
-    data.version = "1.0.0";
-    delete data.bugs;
-    delete data.homepage;
-    delete data.repository;
-    const NEW_DATA = JSON.stringify(data);
-    fs.writeFileSync(PACKAGE_JSON, NEW_DATA);
-  } catch (error) {
-    const PROJECT_DIR = path.resolve(process.cwd(), `../${dir}`);
-    fs.unlinkSync(PROJECT_DIR);
-  }
-}
-
 export function removeGit() {
   const gitFolder = path.resolve(process.cwd(), ".git");
   shell.rm("-rf", gitFolder);
@@ -68,7 +48,6 @@ export function createReadMe(directory: string) {
   const PACKAGE_JSON = path.resolve(process.cwd(), "package.json");
   const rawdata = fs.readFileSync(PACKAGE_JSON);
   const data = JSON.parse(rawdata.toString());
-  const curDir = path.resolve(process.cwd(), `./${directory}/README.md`);
 
   const body = Object.keys(readme).map((key: string) => {
     if (key === "appName") {
@@ -86,5 +65,12 @@ export function createReadMe(directory: string) {
     return;
   });
 
-  fs.writeFileSync(curDir, body.join(""));
+  fs.writeFileSync(getCurrentDirectory(directory) + "/README.md", body.join(""));
+}
+
+export function createPackageJSON(appName: string) {
+  const data = packageJSON;
+  data.name = appName;
+  data.description = data.description.replace("#name", appName.replace(/^\w/, c => c.toUpperCase()));
+  fs.writeFileSync(getCurrentDirectory(appName) + "/package.json", JSON.stringify(data, null, 2));
 }
