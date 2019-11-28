@@ -74,3 +74,9 @@ export function createPackageJSON(appName: string) {
   data.description = data.description.replace("#name", appName.replace(/^\w/, c => c.toUpperCase()));
   fs.writeFileSync(getCurrentDirectory(appName) + "/package.json", JSON.stringify(data, null, 2));
 }
+
+export function createGitIgnore(appName: string) {
+  const FILE_TO_COPY = getCurrentDirectory("src/files") + "/.gitignore";
+  const DESTINATION = getCurrentDirectory(appName) + "/.gitignore";
+  fs.copyFileSync(FILE_TO_COPY, DESTINATION);
+}
