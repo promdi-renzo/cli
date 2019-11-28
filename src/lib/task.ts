@@ -1,11 +1,12 @@
 import * as Listr from "listr";
-import { createIndex, createReadMe, checkCurrentDirectory, createPackageJSON, createGitIgnore } from "./create";
+import { createIndex, createReadMe, checkCurrentDirectory, createPackageJSON, createGitIgnore, createTsConfig } from "./create";
 
 export const createProject = (directory: string) => {
   // ✔ Create index.ts
   // ✔ Create README.MD
   // ✔ Create package.json
   // ✔ Create .gitignore
+  // ✔ Create tsconfig.json
   // create app.module.ts
   // create app.routing.module.ts
   // create environments
@@ -29,6 +30,10 @@ export const createProject = (directory: string) => {
     {
       title: "Create .gitignore",
       task: () => createGitIgnore(directory),
+    },
+    {
+      title: "Create tsconfig.json",
+      task: () => createTsConfig(directory),
     },
   ]);
 
