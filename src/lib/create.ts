@@ -1,7 +1,7 @@
 import * as path from "path";
 import * as shell from "shelljs";
 import * as fs from "fs";
-import { index, readme, packageJSON } from "../json";
+import { index, readme, packageJSON, tsConfig } from "../json";
 
 export function checkCurrentDirectory(name: string) {
   const curDir = getCurrentDirectory(name);
@@ -79,4 +79,8 @@ export function createGitIgnore(appName: string) {
   const FILE_TO_COPY = getCurrentDirectory("src/files") + "/.gitignore";
   const DESTINATION = getCurrentDirectory(appName) + "/.gitignore";
   fs.copyFileSync(FILE_TO_COPY, DESTINATION);
+}
+
+export function createTsConfig(appName: string) {
+  fs.writeFileSync(getCurrentDirectory(appName) + "/tsconfig.json", JSON.stringify(tsConfig, null, 2));
 }
