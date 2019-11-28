@@ -1,23 +1,20 @@
 import * as Listr from "listr";
-import { gitClone, removeGit, updateJson, installDependency } from "./create";
+import { createIndex } from "./create";
 
 export const createProject = (dir: string) => {
+  // ✔ Create index.ts
+  // create README.MD
+  // create package.json
+  // create LICENCE
+  // create app.module.ts
+  // create app.routing.module.ts
+  // create environments
+  // create controllers
+
   const tasks = new Listr([
     {
-      title: "Copying files",
-      task: () => gitClone(dir),
-    },
-    {
-      title: "Removing git folder",
-      task: () => removeGit(),
-    },
-    {
-      title: "Updating package.json",
-      task: () => updateJson(dir),
-    },
-    {
-      title: "Installing dependencies",
-      task: () => installDependency(),
+      title: "Creating index.ts",
+      task: () => createIndex(),
     },
   ]);
 
