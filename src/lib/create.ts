@@ -1,7 +1,7 @@
 import * as path from "path";
 import * as shell from "shelljs";
 import * as fs from "fs";
-import { index, readme, packageJSON, tsConfig, appModule, routing, controller } from "../json";
+import { index, readme, packageJSON, tsConfig, appModule, routing, controller, model } from "../json";
 
 export function checkCurrentDirectory(name: string) {
   const curDir = getCurrentDirectory(name);
@@ -132,9 +132,10 @@ export function createEnvironment(appName: any) {
 export function createController(appName: any) {
   const workingDirectory = checkCurrentDirectory(appName + "/src/controllers");
   createControllerTs(workingDirectory, "sample");
+  createModelTs(workingDirectory, "sample");
 }
 
-function createControllerTs(directory: string, name: string) {
+export function createControllerTs(directory: string, name: string) {
   const imports = controller.imports.join("\n");
   const decorator =
     "@Controller(" +
@@ -158,5 +159,13 @@ function createControllerTs(directory: string, name: string) {
     })
     .join("\n");
   const data = imports + "\n\n" + decorator + "\n" + body;
-  fs.writeFileSync(directory + `/${name}.controller.ts`, data);
+  fs.writeFileSync(path.resolve(directory + `/${name}.controller.ts`), data);
+}
+
+export function createModelTs(directory: string, name: string) {
+  const imports = model.imports.join("\n");
+  const schema = "const schema = new Schema(" + JSON.stringify(model["schema"], null, 2) + ")";
+  const body = model.body.join("\n");
+  const data = imports + "\n\n" + schema + "\n\n" + body;
+  fs.writeFileSync(path.resolve(directory + `/${name}.model.ts`), data);
 }
