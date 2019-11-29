@@ -13,10 +13,9 @@ interface NpmPackage {
 
 export default function runCLI(npm: NpmPackage) {
   program
-    .version(npm.version)
+    .version(npm.version, "-v, --version")
     .name("maya")
     .usage("[options | command] [arguments]")
-    .option("-v, version", npm.version)
     .description(npm.description);
 
   program
