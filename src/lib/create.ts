@@ -26,12 +26,12 @@ export function createIndex(appName: string) {
   fs.writeFileSync(path.resolve(workingDirectory + "/index.ts"), imports + contents);
 }
 
-export function gitClone(dir: string) {
-  const sample = `git clone https://github.com/mayajs/sample.git ${dir}`;
+export function gitInit(directory: string) {
+  shell.cd(directory);
+  const sample = `git init`;
   if (shell.exec(sample).code !== 0) {
     throw new Error("Error: Git clone failed");
   }
-  shell.cd(dir);
 }
 
 export function installDependency() {
