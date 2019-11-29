@@ -90,7 +90,7 @@ const controller = {
     "export class #controller {",
     "constructor(private services: #services) {}",
     '@Get({ path: "/", middlewares: [] })',
-    "get(req: Request, res: Response, next: NextFunction): void {",
+    "root(req: Request, res: Response, next: NextFunction): void {",
     "res.send(this.services.hello());\n  }",
     "}",
   ],
