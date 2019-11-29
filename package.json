@@ -41,6 +41,7 @@
     "shelljs": "^0.8.3"
   },
   "devDependencies": {
+    "@types/chalk": "^2.2.0",
     "@types/commander": "^2.12.2",
     "@types/figlet": "^1.2.0",
     "@types/listr": "^0.14.2",
