@@ -1,5 +1,5 @@
 const index = {
-  imports: ['import { AppModule } from ". / app.module ";', 'import { MayaJS } from "@mayajs/core";'],
+  imports: ['import { AppModule } from "./app.module";', 'import { MayaJS } from "@mayajs/core";'],
   content: ["const server = new MayaJS(AppModule);", 'const prod = process.env.NODE_ENV === "production";', "server.prodMode(prod).start();"],
 };
 
@@ -79,15 +79,15 @@ const controller = {
   imports: [
     'import { Get, Patch, Post, Delete, Put } from "@mayajs/common";',
     'import { Request, Response, NextFunction } from "express";',
-    'import { Controller} from "@mayajs/core";',
     'import { #services } from "./#name.service"',
+    'import { Controller} from "@mayajs/core";',
   ],
   decorator: {
-    model: "./#name.model",
+    model: "./#model",
     route: "/#name",
   },
   body: [
-    "export class #nameController {",
+    "export class #controller {",
     "constructor(private services: #services) {}",
     '@Get({ path: "/", middlewares: [] })',
     "get(req: Request, res: Response, next: NextFunction): void {",
@@ -105,7 +105,7 @@ const model = {
       unique: true,
     },
   },
-  body: ["schema.plugin(paginate);", 'export default model("#name", schema);'],
+  body: ["schema.plugin(paginate);", 'export default model("#Name", schema);'],
 };
 
 const services = {
