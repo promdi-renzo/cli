@@ -15,6 +15,7 @@ import {
   createModelTs,
   createServiceTs,
   gitInit,
+  installDependency,
 } from "./create";
 import * as chalk from "chalk";
 
@@ -31,7 +32,8 @@ export const createProject = (directory: string) => {
     { title: taskTitle("create", `${directory}/src/app.routing.module.ts`), task: createAppRoutingModule },
     { title: taskTitle("create", `${directory}/src/environment`), task: createEnvironment },
     { title: taskTitle("create", `${directory}/src/controller`), task: createController },
-    { title: taskTitle("execute", "Initialize git"), task: gitInit },
+    { title: taskTitle("execute", "Initialize git repository"), task: gitInit },
+    { title: taskTitle("execute", "Install project dependencies"), task: installDependency },
   ]);
 
   tasks.run(directory).catch((err: any) => {
@@ -87,7 +89,7 @@ function taskTitle(type: string, value: string) {
   }
 
   if (type === "execute") {
-    title = `${chalk.red("execute")} ${value}`;
+    title = chalk.yellow(value);
   }
 
   return title;
