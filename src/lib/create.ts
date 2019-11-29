@@ -92,6 +92,7 @@ export function createAppModule(appName: any) {
   const { cors, logs, database: db, port } = appModule;
   const decorator = `@App(${JSON.stringify({ cors, logs, port, database: db }, null, 2)})\n`
     .replace(/\"/g, "")
+    .replace("dev", '"dev"')
     .replace("#url", '"your-connection-string-here"')
     .replace("database: ", "database: Mongo(")
     .replace("}\n})", "}),\n  routes\n})");
@@ -108,17 +109,17 @@ export function createAppRoutingModule(appName: any) {
   const body = Object.keys(routing)
     .map(key => {
       if (key === "controllers") {
-        return `${key} : [SampleController]`;
+        return `  ${key}: [SampleController]`;
       }
 
       if (key === "middlewares") {
-        return `${key} : []`;
+        return `  ${key}: []`;
       }
 
-      return `${key} : ""`;
+      return `  ${key}: ""`;
     })
     .join(",\n  ");
-  const routes = `\n\nexport const routes = [\n  ${body}\n];`;
+  const routes = `\n\nexport const routes = [\n  {\n  ${body},\n  },\n];`;
   const data = imports + routes;
 
   fs.writeFileSync(path.resolve(workingDirectory + "/app.routing.module.ts"), data);
@@ -131,7 +132,8 @@ export function createEnvironment(appName: any) {
 }
 
 export function createController(appName: any) {
-  const workingDirectory = checkCurrentDirectory(appName + "/src/controllers");
+  checkCurrentDirectory(appName + "/src/controllers");
+  const workingDirectory = checkCurrentDirectory(appName + "/src/controllers/sample");
   createControllerTs({ directory: workingDirectory, name: "sample" });
   createModelTs({ directory: workingDirectory, name: "sample" });
   createServiceTs({ directory: workingDirectory, name: "sample" });
