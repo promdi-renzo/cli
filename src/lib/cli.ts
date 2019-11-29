@@ -3,7 +3,7 @@ import * as figlet from "figlet";
 import * as chalk from "chalk";
 
 // TASKS
-import { createProject } from "./task";
+import { createProject, createComponent } from "./task";
 
 // INTERFACE
 interface NpmPackage {
@@ -21,8 +21,14 @@ export default function runCLI(npm: NpmPackage) {
   program
     .command("new <directory>")
     .alias("n")
-    .description(`Creates a new MayaJS project based on the directory.\nExample: ${chalk.green("maya new my-new-app")}`)
+    .description(`Creates a new MayaJS project.\nExample: ${chalk.green("maya new my-new-app\n")}`)
     .action(createProject);
+
+  program
+    .command("generate <component> <directory>")
+    .alias("g")
+    .description(`Creates a new component.\nExample: ${chalk.green("maya generate controller sample\n")}`)
+    .action(createComponent);
 
   program.parse(process.argv);
 
