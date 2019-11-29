@@ -46,7 +46,7 @@ export function removeGit() {
 }
 
 export function createReadMe(directory: string) {
-  const PACKAGE_JSON = path.resolve(process.cwd(), "package.json");
+  const PACKAGE_JSON = path.resolve(__dirname, "../package.json");
   const rawdata = fs.readFileSync(PACKAGE_JSON);
   const data = JSON.parse(rawdata.toString());
 
@@ -77,7 +77,7 @@ export function createPackageJSON(appName: string) {
 }
 
 export function createGitIgnore(appName: string) {
-  const FILE_TO_COPY = getCurrentDirectory("src/files") + "/.gitignore";
+  const FILE_TO_COPY = path.resolve(__dirname, "../src/files/.gitignore");
   const DESTINATION = getCurrentDirectory(appName) + "/.gitignore";
   fs.copyFileSync(FILE_TO_COPY, DESTINATION);
 }
