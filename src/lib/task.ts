@@ -23,15 +23,15 @@ export const createProject = (directory: string) => {
   checkCurrentDirectory(directory);
 
   const tasks = new Listr([
-    { title: taskTitle("create", `${directory}/index.ts`), task: createIndex },
-    { title: taskTitle("create", `${directory}/README.md`), task: createReadMe },
-    { title: taskTitle("create", `${directory}/package.json`), task: createPackageJSON },
-    { title: taskTitle("create", `${directory}/.gitignore`), task: createGitIgnore },
-    { title: taskTitle("create", `${directory}/tsconfig.json`), task: createTsConfig },
+    { title: taskTitle("create", `${directory}/src/index.ts`), task: createIndex },
     { title: taskTitle("create", `${directory}/src/app.module.ts`), task: createAppModule },
     { title: taskTitle("create", `${directory}/src/app.routing.module.ts`), task: createAppRoutingModule },
     { title: taskTitle("create", `${directory}/src/environment`), task: createEnvironment },
     { title: taskTitle("create", `${directory}/src/controller`), task: createController },
+    { title: taskTitle("create", `${directory}/README.md`), task: createReadMe },
+    { title: taskTitle("create", `${directory}/.gitignore`), task: createGitIgnore },
+    { title: taskTitle("create", `${directory}/package.json`), task: createPackageJSON },
+    { title: taskTitle("create", `${directory}/tsconfig.json`), task: createTsConfig },
     { title: taskTitle("execute", "Initialize git repository"), task: gitInit },
     { title: taskTitle("execute", "Install project dependencies"), task: installDependency },
   ]);
