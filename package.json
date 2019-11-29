@@ -15,7 +15,7 @@
     "access": "public"
   },
   "scripts": {
-    "clean": "rimraf index.js && rimraf *.tgz && rimraf *.d.ts && rimraf lib",
+    "clean": "rimraf index.js && rimraf *.tgz && rimraf *.d.ts && rimraf lib && rimraf json",
     "start": "npm run clean && wait-on -r index.js && tsc -w",
     "prepack": "npm run clean && wait-on -r index.js && tsc"
   },
@@ -45,14 +45,14 @@
     "@types/commander": "^2.12.2",
     "@types/figlet": "^1.2.0",
     "@types/listr": "^0.14.2",
-    "@types/node": "^12.7.2",
+    "@types/node": "^12.12.14",
     "@types/shelljs": "^0.8.5",
     "@typescript-eslint/eslint-plugin": "^2.4.0",
     "@typescript-eslint/parser": "^2.4.0",
     "eslint": "^6.5.1",
     "prettier": "^1.18.2",
     "shx": "^0.3.2",
-    "ts-node": "^8.3.0",
+    "ts-node": "^8.5.4",
     "typescript": "^3.5.3",
     "wait-on": "^3.3.0"
   }
