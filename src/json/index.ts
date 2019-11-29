@@ -27,6 +27,7 @@ const packageJSON = {
   author: "",
   keywords: ["mayajs"],
   dependencies: {
+    "@mayajs/common": "^0.3.0",
     "@mayajs/core": "0.3.0",
     "@mayajs/mongo": "0.1.0",
   },
@@ -60,7 +61,7 @@ const tsConfig = {
 const appModule = {
   imports: ['import { App } from "@mayajs/core";', 'import { Mongo } from "@mayajs/mongo";', 'import { routes } from "./app.routing.module";'],
   cors: true,
-  logs: true,
+  logs: "dev",
   database: {
     connectionString: "#url",
     options: { useCreateIndex: true, useNewUrlParser: true, useFindAndModify: false },
