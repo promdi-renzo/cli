@@ -1,7 +1,7 @@
 import * as path from "path";
 import * as shell from "shelljs";
 import * as fs from "fs";
-import { index, readme, packageJSON, tsConfig, appModule, routing, controller, model } from "../json";
+import { index, readme, packageJSON, tsConfig, appModule, routing, controller, model, services } from "../json";
 
 export function checkCurrentDirectory(name: string) {
   const curDir = getCurrentDirectory(name);
@@ -71,7 +71,7 @@ export function createReadMe(directory: string) {
 export function createPackageJSON(appName: string) {
   const data = packageJSON;
   data.name = appName;
-  data.description = data.description.replace("#name", appName.replace(/^\w/, c => c.toUpperCase()));
+  data.description = data.description.replace("#name", upperCaseFirstLetter(appName));
   fs.writeFileSync(getCurrentDirectory(appName) + "/package.json", JSON.stringify(data, null, 2));
 }
 
@@ -133,10 +133,15 @@ export function createController(appName: any) {
   const workingDirectory = checkCurrentDirectory(appName + "/src/controllers");
   createControllerTs(workingDirectory, "sample");
   createModelTs(workingDirectory, "sample");
+  createServiceTs(workingDirectory, "sample");
 }
 
 export function createControllerTs(directory: string, name: string) {
-  const imports = controller.imports.join("\n");
+  const servicesName = upperCaseFirstLetter(name) + "Services";
+  const imports = controller.imports
+    .join("\n")
+    .replace("#services", servicesName)
+    .replace(/#name/g, name);
   const decorator =
     "@Controller(" +
     JSON.stringify(controller["decorator"], null, 2)
@@ -144,6 +149,7 @@ export function createControllerTs(directory: string, name: string) {
       .replace(/\"route\"/g, "route")
       .replace(/#name/g, name) +
     ")";
+
   const body = controller["body"]
     .map((val: string, index: number) => {
       if (index <= 1) {
@@ -157,7 +163,10 @@ export function createControllerTs(directory: string, name: string) {
 
       return val;
     })
-    .join("\n");
+    .join("\n")
+    .replace(/#name/g, upperCaseFirstLetter(name))
+    .replace(/#services/g, servicesName);
+
   const data = imports + "\n\n" + decorator + "\n" + body;
   fs.writeFileSync(path.resolve(directory + `/${name}.controller.ts`), data);
 }
@@ -165,7 +174,31 @@ export function createControllerTs(directory: string, name: string) {
 export function createModelTs(directory: string, name: string) {
   const imports = model.imports.join("\n");
   const schema = "const schema = new Schema(" + JSON.stringify(model["schema"], null, 2) + ")";
-  const body = model.body.join("\n");
+  const body = model.body.join("\n").replace("#name", upperCaseFirstLetter(name));
   const data = imports + "\n\n" + schema + "\n\n" + body;
   fs.writeFileSync(path.resolve(directory + `/${name}.model.ts`), data);
+}
+
+export function createServiceTs(directory: string, name: string) {
+  const imports = services.imports.join("\n");
+  const body = services.body
+    .map((value: string, index: number) => {
+      const spaces = "  ";
+      if (index >= 2 && index <= 5) {
+        value = (index === 4 ? spaces + spaces : spaces) + value;
+        value = value + (index === 2 ? "\n" : "");
+      }
+
+      return value;
+    })
+    .join("\n")
+    .replace("#name", name)
+    .replace("#services", upperCaseFirstLetter(name) + "Services");
+  const data = imports + "\n\n" + body;
+
+  fs.writeFileSync(path.resolve(directory + `/${name}.service.ts`), data);
+}
+
+function upperCaseFirstLetter(word: string) {
+  return word.replace(/^\w/, c => c.toUpperCase());
 }
