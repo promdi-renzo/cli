@@ -14,22 +14,24 @@ import {
   createControllerTs,
   createModelTs,
   createServiceTs,
+  gitInit,
 } from "./create";
 import * as chalk from "chalk";
 
 export const createProject = (directory: string) => {
-  const cur_dir = checkCurrentDirectory(directory);
+  checkCurrentDirectory(directory);
 
   const tasks = new Listr([
-    { title: `${chalk.green("create")} ${cur_dir}/index.ts`, task: createIndex },
-    { title: `${chalk.green("create")} ${cur_dir}/README.md`, task: createReadMe },
-    { title: `${chalk.green("create")} ${cur_dir}/package.json`, task: createPackageJSON },
-    { title: `${chalk.green("create")} ${cur_dir}/.gitignore`, task: createGitIgnore },
-    { title: `${chalk.green("create")} ${cur_dir}/tsconfig.json`, task: createTsConfig },
-    { title: `${chalk.green("create")} ${cur_dir}/app.module.ts`, task: createAppModule },
-    { title: `${chalk.green("create")} ${cur_dir}/app.routing.module.ts`, task: createAppRoutingModule },
-    { title: `${chalk.green("create")} ${cur_dir}/src/environment`, task: createEnvironment },
-    { title: `${chalk.green("create")} ${cur_dir}/src/controller`, task: createController },
+    { title: taskTitle("create", `${directory}/index.ts`), task: createIndex },
+    { title: taskTitle("create", `${directory}/README.md`), task: createReadMe },
+    { title: taskTitle("create", `${directory}/package.json`), task: createPackageJSON },
+    { title: taskTitle("create", `${directory}/.gitignore`), task: createGitIgnore },
+    { title: taskTitle("create", `${directory}/tsconfig.json`), task: createTsConfig },
+    { title: taskTitle("create", `${directory}/src/app.module.ts`), task: createAppModule },
+    { title: taskTitle("create", `${directory}/src/app.routing.module.ts`), task: createAppRoutingModule },
+    { title: taskTitle("create", `${directory}/src/environment`), task: createEnvironment },
+    { title: taskTitle("create", `${directory}/src/controller`), task: createController },
+    { title: taskTitle("execute", "Initialize git"), task: gitInit },
   ]);
 
   tasks.run(directory).catch((err: any) => {
@@ -65,27 +67,28 @@ export const createComponent = (component: string, directory: string) => {
 };
 
 function createControllerTaskList(directory: string, name: string) {
+  const workingDirectory = `src/${directory}/${name}`;
   return new Listr([
-    {
-      title: `${chalk.green("create")} ${getCurrentDirectory(`src/${directory}/${name}.controller.ts`)}`.replace(process.cwd(), ""),
-      task: createControllerTs,
-    },
-    {
-      title: `${chalk.green("create")} ${getCurrentDirectory(`src/${directory}/${name}.model.ts`)}`.replace(process.cwd(), ""),
-      task: createModelTs,
-    },
-    {
-      title: `${chalk.green("create")} ${getCurrentDirectory(`src/${directory}/${name}.service.ts`)}`.replace(process.cwd(), ""),
-      task: createServiceTs,
-    },
+    { title: taskTitle("create", `${workingDirectory}.controller.ts`), task: createControllerTs },
+    { title: taskTitle("create", `${workingDirectory}.model.ts`), task: createModelTs },
+    { title: taskTitle("create", `${workingDirectory}.service.ts`), task: createServiceTs },
   ]);
 }
 
 function createServicesTaskList(directory: string, name: string) {
-  return new Listr([
-    {
-      title: `${chalk.green("create")} ${getCurrentDirectory(`src/${directory}/${name}.service.ts`)}`.replace(process.cwd(), ""),
-      task: createServiceTs,
-    },
-  ]);
+  return new Listr([{ title: taskTitle("create", `src/${directory}/${name}.service.ts`), task: createServiceTs }]);
+}
+
+function taskTitle(type: string, value: string) {
+  let title = "";
+
+  if (type === "create") {
+    title = `${chalk.green("create")} ${getCurrentDirectory(value)}`.replace(process.cwd(), "");
+  }
+
+  if (type === "execute") {
+    title = `${chalk.red("execute")} ${value}`;
+  }
+
+  return title;
 }
