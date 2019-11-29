@@ -13,7 +13,6 @@ import {
 } from "./create";
 
 export const createProject = (directory: string) => {
-
   const cur_dir = checkCurrentDirectory(directory);
 
   const tasks = new Listr([
@@ -31,4 +30,14 @@ export const createProject = (directory: string) => {
   tasks.run(directory).catch((err: any) => {
     console.error(err);
   });
+};
+
+export const createComponent = (component: string, directory: string) => {
+  if (component === "c" || component === "controller") {
+    console.log("Creating controller component...");
+  }
+
+  if (component === "s" || component === "services") {
+    console.log("Creating services component...");
+  }
 };
