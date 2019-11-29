@@ -122,7 +122,7 @@ export function createAppRoutingModule(appName: any) {
 }
 
 export function createEnvironment(appName: any) {
-  const srcDirectory = checkCurrentDirectory(appName + "/src");
+  checkCurrentDirectory(appName + "/src");
   const workingDirectory = checkCurrentDirectory(appName + "/src/environments");
   const data = ["export const environment = {", " production: false,", "};"].join("\n");
   fs.writeFileSync(workingDirectory + "/index.ts", data);
@@ -130,12 +130,13 @@ export function createEnvironment(appName: any) {
 
 export function createController(appName: any) {
   const workingDirectory = checkCurrentDirectory(appName + "/src/controllers");
-  createControllerTs(workingDirectory, "sample");
-  createModelTs(workingDirectory, "sample");
-  createServiceTs(workingDirectory, "sample");
+  createControllerTs({ directory: workingDirectory, name: "sample" });
+  createModelTs({ directory: workingDirectory, name: "sample" });
+  createServiceTs({ directory: workingDirectory, name: "sample" });
 }
 
-export function createControllerTs(directory: string, name: string) {
+export function createControllerTs(object: { directory: string; name: string }) {
+  const { directory, name } = object;
   const imports = controller.imports.join("\n");
   const decorator =
     "@Controller(" +
@@ -167,7 +168,8 @@ export function createControllerTs(directory: string, name: string) {
   fs.writeFileSync(path.resolve(directory + `/${name}.controller.ts`), updatedNames);
 }
 
-export function createModelTs(directory: string, name: string) {
+export function createModelTs(object: { directory: string; name: string }) {
+  const { directory, name } = object;
   const imports = model.imports.join("\n");
   const schema = "const schema = new Schema(" + JSON.stringify(model["schema"], null, 2) + ")";
   const body = model.body.join("\n");
@@ -175,7 +177,8 @@ export function createModelTs(directory: string, name: string) {
   fs.writeFileSync(path.resolve(directory + `/${name}.model.ts`), updateNames(data, name));
 }
 
-export function createServiceTs(directory: string, name: string) {
+export function createServiceTs(object: { directory: string; name: string }) {
+  const { directory, name } = object;
   const imports = services.imports.join("\n");
   const body = services.body
     .map((value: string, index: number) => {
