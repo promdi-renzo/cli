@@ -17,6 +17,7 @@ import {
   gitInit,
   installDependency,
 } from "./create";
+import { serve } from "./runner";
 import * as chalk from "chalk";
 
 export const createProject = (directory: string) => {
@@ -93,4 +94,17 @@ function taskTitle(type: string, value: string) {
   }
 
   return title;
+}
+
+export function runServer(directory: string, name: string) {
+  const tasks = new Listr([
+    {
+      title: "Run server",
+      task: serve,
+    },
+  ]);
+
+  tasks.run({ directory, name }).catch((err: any) => {
+    console.error(err);
+  });
 }
