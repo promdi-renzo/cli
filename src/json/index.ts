@@ -80,17 +80,18 @@ const controller = {
     'import { Get, Patch, Post, Delete, Put } from "@mayajs/common";',
     'import { Request, Response, NextFunction } from "express";',
     'import { Controller} from "@mayajs/core";',
+    'import { #services } from "./#name.service"',
   ],
   decorator: {
     model: "./#name.model",
     route: "/#name",
   },
   body: [
-    "export class SampleController {",
-    "constructor() {}",
+    "export class #nameController {",
+    "constructor(private services: #services) {}",
     '@Get({ path: "/", middlewares: [] })',
     "get(req: Request, res: Response, next: NextFunction): void {",
-    'res.send("Hello world!");\n  }',
+    "res.send(this.services.hello());\n  }",
     "}",
   ],
 };
@@ -104,7 +105,12 @@ const model = {
       unique: true,
     },
   },
-  body: ["schema.plugin(paginate);", 'export default model("Sample", schema);'],
+  body: ["schema.plugin(paginate);", 'export default model("#name", schema);'],
 };
 
-export { index, readme, packageJSON, tsConfig, appModule, routing, controller, model };
+const services = {
+  imports: ['import { Injectable } from "@mayajs/core";', 'import { Models } from "@mayajs/mongo";'],
+  body: ["@Injectable()", "export class #services {", '@Models("#name") model: any;', "hello() {", 'return "Hello world!";', "}", "}"],
+};
+
+export { index, readme, packageJSON, tsConfig, appModule, routing, controller, model, services };
