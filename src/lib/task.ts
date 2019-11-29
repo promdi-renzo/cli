@@ -51,20 +51,7 @@ export const createComponent = (component: string, directory: string) => {
   const workingDirectory = checkCurrentDirectory(dir);
 
   if (component === "c" || component === "controller") {
-    tasks = new Listr([
-      {
-        title: `Create ${getCurrentDirectory(`src/${directory}/${name}.controller.ts`)}`,
-        task: createControllerTs,
-      },
-      {
-        title: `Create ${getCurrentDirectory(`src/${directory}/${name}.model.ts`)}`,
-        task: createModelTs,
-      },
-      {
-        title: `Create ${getCurrentDirectory(`src/${directory}/${name}.service.ts`)}`,
-        task: createServiceTs,
-      },
-    ]);
+    tasks = createControllerTaskList(directory, name);
   }
 
   if (component === "s" || component === "services") {
@@ -80,3 +67,20 @@ export const createComponent = (component: string, directory: string) => {
     console.error(err);
   });
 };
+
+function createControllerTaskList(directory: string, name: string) {
+  return new Listr([
+    {
+      title: `Create ${getCurrentDirectory(`src/${directory}/${name}.controller.ts`)}`,
+      task: createControllerTs,
+    },
+    {
+      title: `Create ${getCurrentDirectory(`src/${directory}/${name}.model.ts`)}`,
+      task: createModelTs,
+    },
+    {
+      title: `Create ${getCurrentDirectory(`src/${directory}/${name}.service.ts`)}`,
+      task: createServiceTs,
+    },
+  ]);
+}
