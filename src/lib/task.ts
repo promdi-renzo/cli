@@ -17,8 +17,10 @@ import {
   gitInit,
   installDependency,
 } from "./create";
-import { serve } from "./runner";
+import { serve } from "./serve";
 import * as chalk from "chalk";
+import { exec } from "child_process";
+import * as util from "util";
 
 export const createProject = (directory: string) => {
   checkCurrentDirectory(directory);
@@ -96,15 +98,18 @@ function taskTitle(type: string, value: string) {
   return title;
 }
 
-export function runServer(directory: string, name: string) {
-  const tasks = new Listr([
-    {
-      title: "Run server",
-      task: serve,
-    },
-  ]);
-
-  tasks.run({ directory, name }).catch((err: any) => {
-    console.error(err);
-  });
+export async function runServer(cmd: any, options: any) {
+  const port = 3333;
+  try {
+    const execute = util.promisify(exec);
+    const { stdout } = await execute("netstat -ano | findstr :3333");
+    const portUsed = stdout
+      .replace(/\r?\n|\r/g, "")
+      .split(" ")
+      .filter(Boolean)
+      .slice(-1)[0];
+    console.log(`PORT ${port} on ${portUsed} is already in use!!!`);
+    await execute(`taskkill /PID ${portUsed} /F`);
+  } catch (error) {}
+  serve();
 }
