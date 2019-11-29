@@ -68,7 +68,12 @@ export const createComponent = (component: string, directory: string) => {
   }
 
   if (component === "s" || component === "services") {
-    console.log("Creating services component...");
+    tasks = new Listr([
+      {
+        title: `Create ${getCurrentDirectory(`src/${directory}/${name}.service.ts`)}`,
+        task: createServiceTs,
+      },
+    ]);
   }
 
   tasks.run({ directory: workingDirectory, name }).catch((err: any) => {
