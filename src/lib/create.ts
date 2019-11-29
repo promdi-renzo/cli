@@ -19,10 +19,11 @@ export function getCurrentDirectory(name: string) {
   return path.resolve(process.cwd(), `./${name}`);
 }
 
-export function createIndex(directory: string) {
+export function createIndex(appName: string) {
+  const workingDirectory = checkCurrentDirectory(appName + "/src");
   const imports = index.imports.join("\n") + "\n\n";
   const contents = index.content.join("\n");
-  fs.writeFileSync(path.resolve(getCurrentDirectory(directory) + "/index.ts"), imports + contents);
+  fs.writeFileSync(path.resolve(workingDirectory + "/index.ts"), imports + contents);
 }
 
 export function gitClone(dir: string) {
@@ -86,6 +87,7 @@ export function createTsConfig(appName: string) {
 }
 
 export function createAppModule(appName: any) {
+  const workingDirectory = checkCurrentDirectory(appName + "/src");
   const imports = appModule.imports.map(val => val + "\n").join("") + "\n";
   const { cors, logs, database: db, port } = appModule;
   const decorator = `@App(${JSON.stringify({ cors, logs, port, database: db }, null, 2)})\n`
@@ -95,10 +97,11 @@ export function createAppModule(appName: any) {
     .replace("}\n})", "}),\n  routes\n})");
 
   const data = imports + decorator + "export class AppModule {}";
-  fs.writeFileSync(path.resolve(checkCurrentDirectory(appName) + "/app.module.ts"), data);
+  fs.writeFileSync(path.resolve(workingDirectory + "/app.module.ts"), data);
 }
 
 export function createAppRoutingModule(appName: any) {
+  const workingDirectory = checkCurrentDirectory(appName + "/src");
   const imports = routing.imports;
   delete routing.imports;
 
@@ -118,11 +121,10 @@ export function createAppRoutingModule(appName: any) {
   const routes = `\n\nexport const routes = [\n  ${body}\n];`;
   const data = imports + routes;
 
-  fs.writeFileSync(path.resolve(checkCurrentDirectory(appName) + "/app.routing.module.ts"), data);
+  fs.writeFileSync(path.resolve(workingDirectory + "/app.routing.module.ts"), data);
 }
 
 export function createEnvironment(appName: any) {
-  checkCurrentDirectory(appName + "/src");
   const workingDirectory = checkCurrentDirectory(appName + "/src/environments");
   const data = ["export const environment = {", " production: false,", "};"].join("\n");
   fs.writeFileSync(workingDirectory + "/index.ts", data);
