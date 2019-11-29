@@ -10,6 +10,10 @@ import {
   createAppRoutingModule,
   createEnvironment,
   createController,
+  getCurrentDirectory,
+  createControllerTs,
+  createModelTs,
+  createServiceTs,
 } from "./create";
 
 export const createProject = (directory: string) => {
@@ -33,11 +37,41 @@ export const createProject = (directory: string) => {
 };
 
 export const createComponent = (component: string, directory: string) => {
+  let tasks = new Listr([]);
+  const dir_array = directory.split(/\\|\//);
+  const name = dir_array[dir_array.length - 1];
+
+  checkCurrentDirectory("src");
+
+  const dir = dir_array.reduce((acc: string, cur: string) => {
+    checkCurrentDirectory(`${acc}/${cur}`);
+    return `${acc}/${cur}`;
+  }, "src");
+
+  const workingDirectory = checkCurrentDirectory(dir);
+
   if (component === "c" || component === "controller") {
-    console.log("Creating controller component...");
+    tasks = new Listr([
+      {
+        title: `Create ${getCurrentDirectory(`src/${directory}/${name}.controller.ts`)}`,
+        task: createControllerTs,
+      },
+      {
+        title: `Create ${getCurrentDirectory(`src/${directory}/${name}.model.ts`)}`,
+        task: createModelTs,
+      },
+      {
+        title: `Create ${getCurrentDirectory(`src/${directory}/${name}.service.ts`)}`,
+        task: createServiceTs,
+      },
+    ]);
   }
 
   if (component === "s" || component === "services") {
     console.log("Creating services component...");
   }
+
+  tasks.run({ directory: workingDirectory, name }).catch((err: any) => {
+    console.error(err);
+  });
 };
