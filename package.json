@@ -6,7 +6,8 @@
   "files": [
     "index.js",
     "lib",
-    "files"
+    "files",
+    "json"
   ],
   "bin": {
     "maya": "./index.js"
