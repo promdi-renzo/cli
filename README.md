@@ -24,7 +24,7 @@ Create a new MayaJS project. This will generate all the basic files and install 
 
 ### Usage
 
-`sh maya new my-new-app` or `maya n my-new-app`
+`maya new my-new-app` or `maya n my-new-app`
 
 ## GENERATE
 
@@ -36,15 +36,15 @@ This will help you generate components inside your MayaJS project. You can gener
 
 #### CONTROLLER
 
-`sh maya generate controller sample` or `sh maya g c sample`
+`maya generate controller sample` or `maya g c sample`
 
 #### SERVICE
 
-`sh maya generate service sample` or `maya g s sample`
+`maya generate service sample` or `maya g s sample`
 
 #### MODEL
 
-`sh maya generate model sample` or `maya g m sample`
+`maya generate model sample` or `maya g m sample`
 
 ## SERVE
 
@@ -56,8 +56,8 @@ This will run your MayaJS project which listens on port `3333` by default. In ca
 
 #### DEFAULT
 
-`sh maya serve` or `sh maya s`
+`maya serve` or `sh maya s`
 
 #### CHANGE PORT
 
-`sh maya serve --port 4444` or `sh maya s -p 4444`
+`maya serve --port 4444` or `maya s -p 4444`
