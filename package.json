@@ -1,6 +1,6 @@
 {
   "name": "@mayajs/cli",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "MayaJS Command Line Interface",
   "main": "index.js",
   "files": [
