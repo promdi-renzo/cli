@@ -47,6 +47,7 @@ export default function runCLI(npm: NpmPackage) {
   program
     .command("serve")
     .alias("s")
+    .option("-p, --port [port]", "Change port number")
     .description(
       `Run the server.
     ${chalk.green("maya serve")} | ${chalk.green("maya s")}
@@ -56,7 +57,7 @@ export default function runCLI(npm: NpmPackage) {
 
   program.parse(process.argv);
 
-  if (program.args.length === 0) {
+  if (process.argv.length === 2) {
     console.log(chalk.red(figlet.textSync("MayaJS", { horizontalLayout: "full" })));
     program.outputHelp();
   }
