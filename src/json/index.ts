@@ -22,17 +22,17 @@ const packageJSON = {
   description: "#name MayaJS Project",
   main: "index.js",
   scripts: {
-    start: "nodemon --exec ts-node src/index.ts",
+    maya: "maya",
+    start: "maya serve",
   },
   author: "",
   keywords: ["mayajs"],
   dependencies: {
     "@mayajs/common": "^0.3.0",
-    "@mayajs/core": "0.3.0",
-    "@mayajs/mongo": "0.1.0",
+    "@mayajs/core": "0.3.2",
+    "@mayajs/mongo": "0.2.0",
   },
   devDependencies: {
-    "@types/dotenv": "^6.1.1",
     "@types/express": "^4.17.0",
     "@types/mongoose": "^5.5.13",
     "@types/mongoose-paginate": "^5.0.6",
