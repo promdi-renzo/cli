@@ -99,10 +99,10 @@ function taskTitle(type: string, value: string) {
 }
 
 export async function runServer(cmd: any, options: any) {
-  const port = 3333;
+  const port = cmd.port ? cmd.port : 3333;
   try {
     const execute = util.promisify(exec);
-    const { stdout } = await execute("netstat -ano | findstr :3333");
+    const { stdout } = await execute(`netstat -ano | findstr :${port}`);
     const portUsed = stdout
       .replace(/\r?\n|\r/g, "")
       .split(" ")
@@ -111,5 +111,5 @@ export async function runServer(cmd: any, options: any) {
     console.log(`PORT ${port} on ${portUsed} is already in use!!!`);
     await execute(`taskkill /PID ${portUsed} /F`);
   } catch (error) {}
-  serve();
+  serve(port);
 }
