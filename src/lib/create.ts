@@ -174,11 +174,10 @@ export function createControllerTs(object: { directory: string; name: string }) 
 
 export function createModelTs(object: { directory: string; name: string }) {
   const { directory, name } = object;
-  const imports = model.imports.join("\n");
-  const schema = "const schema = new Schema(" + JSON.stringify(model["schema"], null, 2) + ")";
-  const body = model.body.join("\n");
-  const data = imports + "\n\n" + schema + "\n\n" + body;
-  fs.writeFileSync(path.resolve(directory + `/${name}.model.ts`), updateNames(data, name));
+  const FILE_PATH = path.resolve(__dirname, "../files/model");
+  const CONTENTS = fs.readFileSync(FILE_PATH, "utf8");
+  const DATA = updateNames(CONTENTS, name);
+  fs.writeFileSync(path.resolve(directory + `/${name}.model.ts`), DATA);
 }
 
 export function createServiceTs(object: { directory: string; name: string }) {
