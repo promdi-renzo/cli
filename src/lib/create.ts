@@ -92,7 +92,7 @@ export function createEnvironment(appName: any) {
 
 export function createController(appName: any) {
   checkCurrentDirectory(appName + "/src/controllers");
-  const workingDirectory = checkCurrentDirectory(appName + "/src/controllers/sample");
+  const workingDirectory = checkCurrentDirectory(appName + "/src/controllers/sample") + "/sample";
   createControllerTs({ directory: workingDirectory, name: "sample", start: true });
   createModelTs({ directory: workingDirectory, name: "sample" });
   createServiceTs({ directory: workingDirectory, name: "sample", start: true });
@@ -104,7 +104,7 @@ export function createControllerTs(object: { directory: string; name: string; st
   const services = upperCaseFirstLetter(name) + "Services";
   const updatedConstructor = CONTENTS.replace(/#constructor/g, start ? `private services: ${services}` : "");
   const methodData = [
-    '\n  @Get({ path: "/", middlewares: [] })\n  ',
+    '\n  @Get({ path: "/", middlewares: [] })\n',
     "  root(req: Request, res: Response, next: NextFunction): void {\n  ",
     "  res.send(this.services.hello());\n  }",
   ].join("");
@@ -113,14 +113,14 @@ export function createControllerTs(object: { directory: string; name: string; st
   const updatedController = updateControllersName(updatedServices, name);
   const updatedModel = updateModelsName(updatedController, name);
   const DATA = updateNames(updatedModel, name);
-  fs.writeFileSync(path.resolve(directory + `/${name}.controller.ts`), DATA);
+  fs.writeFileSync(path.resolve(`${directory}.controller.ts`), DATA);
 }
 
 export function createModelTs(object: { directory: string; name: string }) {
   const { directory, name } = object;
   const CONTENTS = getContentsUTF8FromDirname("../files/model");
   const DATA = updateNames(CONTENTS, name);
-  fs.writeFileSync(path.resolve(directory + `/${name}.model.ts`), DATA);
+  fs.writeFileSync(path.resolve(`${directory}.model.ts`), DATA);
 }
 
 export function createServiceTs(object: { directory: string; name: string; start?: boolean }) {
@@ -130,7 +130,7 @@ export function createServiceTs(object: { directory: string; name: string; start
   const updatedMethod = CONTENTS.replace(/#method/g, start ? methodData : "");
   const updatedSerices = updateServicesName(updatedMethod, name);
   const DATA = updateNames(updatedSerices, name);
-  fs.writeFileSync(path.resolve(directory + `/${name}.service.ts`), DATA);
+  fs.writeFileSync(path.resolve(`${directory}.service.ts`), DATA);
 }
 
 function upperCaseFirstLetter(word: string) {
