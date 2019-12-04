@@ -56,9 +56,10 @@ export const createComponent = (component: string, directory: string) => {
     return `${acc}/${cur}`;
   }, "src");
 
-  const workingDirectory = checkCurrentDirectory(dir);
+  let workingDirectory = checkCurrentDirectory(dir);
 
   if (component === "c" || component === "controller") {
+    workingDirectory += `/${directory}`;
     tasks = createControllerTaskList(directory, name);
   }
 
