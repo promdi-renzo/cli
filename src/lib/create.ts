@@ -77,7 +77,7 @@ export function createPackageJSON(appName: string) {
 }
 
 export function createGitIgnore(appName: string) {
-  const FILE_TO_COPY = path.resolve(__dirname, "../files/.gitignore");
+  const FILE_TO_COPY = path.resolve(__dirname, "../files/gitignore");
   const DESTINATION = getCurrentDirectory(appName) + "/.gitignore";
   fs.copyFileSync(FILE_TO_COPY, DESTINATION);
 }
