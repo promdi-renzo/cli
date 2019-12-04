@@ -20,8 +20,7 @@ export function getCurrentDirectory(name: string) {
 
 export function createIndex(appName: string) {
   const workingDirectory = checkCurrentDirectory(appName + "/src");
-  const FILE_PATH = path.resolve(__dirname, "../files/index");
-  const CONTENTS = fs.readFileSync(FILE_PATH, "utf8");
+  const CONTENTS = getContentsUTF8FromDirname("../files/index");
   fs.writeFileSync(path.resolve(workingDirectory + "/index.ts"), CONTENTS);
 }
 
@@ -45,11 +44,9 @@ export function removeGit() {
 }
 
 export function createReadMe(directory: string) {
-  const PACKAGE_JSON = path.resolve(__dirname, "../package.json");
-  const PACKAGE_DATA = fs.readFileSync(PACKAGE_JSON, "utf8");
+  const PACKAGE_DATA = getContentsUTF8FromDirname("../package.json");
   const PACKAGE_DATA_JSON = JSON.parse(PACKAGE_DATA);
-  const FILE_PATH = path.resolve(__dirname, "../files/README");
-  const CONTENTS = fs.readFileSync(FILE_PATH, "utf8");
+  const CONTENTS = getContentsUTF8FromDirname("../files/README");
   const UPDATED_CONTENTS = CONTENTS.replace(/#cli-url/g, PACKAGE_DATA_JSON.homepage.replace(/#readme/g, "")).replace(
     /#cli-version/g,
     PACKAGE_DATA_JSON.version
@@ -59,8 +56,7 @@ export function createReadMe(directory: string) {
 }
 
 export function createPackageJSON(appName: string) {
-  const FILE_PATH = path.resolve(__dirname, "../files/package");
-  const CONTENTS = fs.readFileSync(FILE_PATH, "utf8");
+  const CONTENTS = getContentsUTF8FromDirname("../files/package");
   const DATA = updateNames(CONTENTS, appName);
   fs.writeFileSync(path.resolve(getCurrentDirectory(appName) + "/package.json"), DATA);
 }
@@ -72,22 +68,19 @@ export function createGitIgnore(appName: string) {
 }
 
 export function createTsConfig(appName: string) {
-  const FILE_PATH = path.resolve(__dirname, "../files/tsconfig");
-  const CONTENTS = fs.readFileSync(FILE_PATH, "utf8");
+  const CONTENTS = getContentsUTF8FromDirname("../files/tsconfig");
   fs.writeFileSync(path.resolve(getCurrentDirectory(appName) + "/tsconfig.json"), CONTENTS);
 }
 
 export function createAppModule(appName: any) {
   const workingDirectory = checkCurrentDirectory(appName + "/src");
-  const FILE_PATH = path.resolve(__dirname, "../files/app.module");
-  const CONTENTS = fs.readFileSync(FILE_PATH, "utf8");
+  const CONTENTS = getContentsUTF8FromDirname("../files/app.module");
   fs.writeFileSync(path.resolve(workingDirectory + "/app.module.ts"), CONTENTS);
 }
 
 export function createAppRoutingModule(appName: any) {
   const workingDirectory = checkCurrentDirectory(appName + "/src");
-  const FILE_PATH = path.resolve(__dirname, "../files/routing");
-  const CONTENTS = fs.readFileSync(FILE_PATH, "utf8");
+  const CONTENTS = getContentsUTF8FromDirname("../files/routing");
   fs.writeFileSync(path.resolve(workingDirectory + "/app.routing.module.ts"), CONTENTS);
 }
 
@@ -107,8 +100,7 @@ export function createController(appName: any) {
 
 export function createControllerTs(object: { directory: string; name: string; start?: boolean }) {
   const { directory, name, start } = object;
-  const FILE_PATH = path.resolve(__dirname, "../files/controller");
-  const CONTENTS = fs.readFileSync(FILE_PATH, "utf8");
+  const CONTENTS = getContentsUTF8FromDirname("../files/controller");
   const services = upperCaseFirstLetter(name) + "Services";
   const updatedConstructor = CONTENTS.replace(/#constructor/g, start ? `private services: ${services}` : "");
   const methodData = [
@@ -126,17 +118,15 @@ export function createControllerTs(object: { directory: string; name: string; st
 
 export function createModelTs(object: { directory: string; name: string }) {
   const { directory, name } = object;
-  const FILE_PATH = path.resolve(__dirname, "../files/model");
-  const CONTENTS = fs.readFileSync(FILE_PATH, "utf8");
+  const CONTENTS = getContentsUTF8FromDirname("../files/model");
   const DATA = updateNames(CONTENTS, name);
   fs.writeFileSync(path.resolve(directory + `/${name}.model.ts`), DATA);
 }
 
 export function createServiceTs(object: { directory: string; name: string; start?: boolean }) {
   const { directory, name, start = false } = object;
-  const FILE_PATH = path.resolve(__dirname, "../files/service");
-  const CONTENTS = fs.readFileSync(FILE_PATH, "utf8");
-  const methodData = ["\nhello() {\n  ", '  return "Hello world!";\n  ', "}\n", "}"].join("");
+  const CONTENTS = getContentsUTF8FromDirname("../files/service");
+  const methodData = ["\n  hello() {\n  ", '  return "Hello world!";\n  ', "}\n"].join("");
   const updatedMethod = CONTENTS.replace(/#method/g, start ? methodData : "");
   const updatedSerices = updateServicesName(updatedMethod, name);
   const DATA = updateNames(updatedSerices, name);
@@ -149,7 +139,7 @@ function upperCaseFirstLetter(word: string) {
 
 function updateServicesImport(word: string, name: string) {
   const services = upperCaseFirstLetter(name) + "Services";
-  const importStatement = `import { ${services} } from "./${name}.service"`;
+  const importStatement = `import { ${services} } from "./${name}.service"\n`;
   return word.replace(/#services/g, importStatement);
 }
 
@@ -169,4 +159,9 @@ function updateModelsName(word: string, name: string) {
 
 function updateNames(word: string, name: string) {
   return word.replace(/#name/g, name).replace(/#Name/g, upperCaseFirstLetter(name));
+}
+
+function getContentsUTF8FromDirname(relativePath: string) {
+  const FILE_PATH = path.resolve(__dirname, relativePath);
+  return fs.readFileSync(FILE_PATH, "utf8");
 }
