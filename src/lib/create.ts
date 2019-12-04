@@ -1,7 +1,6 @@
 import * as path from "path";
 import * as shell from "shelljs";
 import * as fs from "fs";
-import { index, routing } from "../json";
 
 export function checkCurrentDirectory(name: string) {
   const curDir = getCurrentDirectory(name);
@@ -21,9 +20,9 @@ export function getCurrentDirectory(name: string) {
 
 export function createIndex(appName: string) {
   const workingDirectory = checkCurrentDirectory(appName + "/src");
-  const imports = index.imports.join("\n") + "\n\n";
-  const contents = index.content.join("\n");
-  fs.writeFileSync(path.resolve(workingDirectory + "/index.ts"), imports + contents);
+  const FILE_PATH = path.resolve(__dirname, "../files/index");
+  const CONTENTS = fs.readFileSync(FILE_PATH, "utf8");
+  fs.writeFileSync(path.resolve(workingDirectory + "/index.ts"), CONTENTS);
 }
 
 export function gitInit(directory: string) {
