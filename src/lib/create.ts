@@ -1,7 +1,7 @@
 import * as path from "path";
 import * as shell from "shelljs";
 import * as fs from "fs";
-import { index, readme, packageJSON, tsConfig, appModule, routing, controller, model, services } from "../json";
+import { index, readme, packageJSON, tsConfig, appModule, routing, controller } from "../json";
 
 export function checkCurrentDirectory(name: string) {
   const curDir = getCurrentDirectory(name);

@@ -97,21 +97,4 @@ const controller = {
   ],
 };
 
-const model = {
-  imports: ['import { Schema, model } from "mongoose";', 'import paginate from "mongoose-paginate";'],
-  schema: {
-    name: {
-      required: [true, "Name is required."],
-      type: String,
-      unique: true,
-    },
-  },
-  body: ["schema.plugin(paginate);", 'export default model("#Name", schema);'],
-};
-
-const services = {
-  imports: ['import { Injectable } from "@mayajs/core";', 'import { Models } from "@mayajs/mongo";'],
-  body: ["@Injectable()", "export class #services {", '@Models("#name") model: any;', "hello() {", 'return "Hello world!";', "}", "}"],
-};
-
-export { index, readme, packageJSON, tsConfig, appModule, routing, controller, model, services };
+export { index, readme, packageJSON, tsConfig, appModule, routing, controller };
