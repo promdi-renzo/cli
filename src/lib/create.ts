@@ -70,10 +70,10 @@ export function createReadMe(directory: string) {
 }
 
 export function createPackageJSON(appName: string) {
-  const data = packageJSON;
-  data.name = appName;
-  data.description = data.description.replace("#name", upperCaseFirstLetter(appName));
-  fs.writeFileSync(path.resolve(getCurrentDirectory(appName) + "/package.json"), JSON.stringify(data, null, 2));
+  const FILE_PATH = path.resolve(__dirname, "../files/model");
+  const CONTENTS = fs.readFileSync(FILE_PATH, "utf8");
+  const DATA = updateNames(CONTENTS, appName);
+  fs.writeFileSync(path.resolve(getCurrentDirectory(appName) + "/package.json"), DATA);
 }
 
 export function createGitIgnore(appName: string) {
