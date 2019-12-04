@@ -78,17 +78,9 @@ export function createTsConfig(appName: string) {
 
 export function createAppModule(appName: any) {
   const workingDirectory = checkCurrentDirectory(appName + "/src");
-  const imports = appModule.imports.map(val => val + "\n").join("") + "\n";
-  const { cors, logs, database: db, port } = appModule;
-  const decorator = `@App(${JSON.stringify({ cors, logs, port, database: db }, null, 2)})\n`
-    .replace(/\"/g, "")
-    .replace("dev", '"dev"')
-    .replace("#url", '"your-connection-string-here"')
-    .replace("database: ", "database: Mongo(")
-    .replace("}\n})", "}),\n  routes\n})");
-
-  const data = imports + decorator + "export class AppModule {}";
-  fs.writeFileSync(path.resolve(workingDirectory + "/app.module.ts"), data);
+  const FILE_PATH = path.resolve(__dirname, "../files/app.module");
+  const CONTENTS = fs.readFileSync(FILE_PATH, "utf8");
+  fs.writeFileSync(path.resolve(workingDirectory + "/app.module.ts"), CONTENTS);
 }
 
 export function createAppRoutingModule(appName: any) {
