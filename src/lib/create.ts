@@ -133,10 +133,11 @@ export function createControllerTs(object: { directory: string; name: string; st
   const { directory, name, start } = object;
   const FILE_PATH = path.resolve(__dirname, "../files/controller");
   const CONTENTS = fs.readFileSync(FILE_PATH, "utf8");
-  const updatedConstructor = CONTENTS.replace(/#constructor/g, start ? `private services: #services` : "");
+  const services = upperCaseFirstLetter(name) + "Services";
+  const updatedConstructor = CONTENTS.replace(/#constructor/g, start ? `private services: ${services}` : "");
   const methodData = [
-    '@Get({ path: "/", middlewares: [] })\n',
-    "  root(req: Request, res: Response, next: NextFunction): void {\n",
+    '\n  @Get({ path: "/", middlewares: [] })\n  ',
+    "  root(req: Request, res: Response, next: NextFunction): void {\n  ",
     "  res.send(this.services.hello());\n  }",
   ].join("");
   const updatedMethod = updatedConstructor.replace(/#method/g, start ? methodData : "");
