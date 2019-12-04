@@ -1,7 +1,7 @@
 import * as path from "path";
 import * as shell from "shelljs";
 import * as fs from "fs";
-import { index, readme, tsConfig, appModule, routing } from "../json";
+import { index, tsConfig, appModule, routing } from "../json";
 
 export function checkCurrentDirectory(name: string) {
   const curDir = getCurrentDirectory(name);
@@ -47,30 +47,20 @@ export function removeGit() {
 
 export function createReadMe(directory: string) {
   const PACKAGE_JSON = path.resolve(__dirname, "../package.json");
-  const rawdata = fs.readFileSync(PACKAGE_JSON);
-  const data = JSON.parse(rawdata.toString());
-
-  const body = Object.keys(readme).map((key: string) => {
-    if (key === "appName") {
-      return `# ${directory}\n\n`;
-    }
-
-    if (key === "description") {
-      return readme[key].replace("#cli-url", data.homepage.replace("#readme", "")).replace("#cli-version", data.version) + "\n\n";
-    }
-
-    if (key === "body") {
-      return readme[key].map(el => el + "\n\n").join("");
-    }
-
-    return;
-  });
-
-  fs.writeFileSync(path.resolve(getCurrentDirectory(directory) + "/README.md"), body.join(""));
+  const PACKAGE_DATA = fs.readFileSync(PACKAGE_JSON, "utf8");
+  const PACKAGE_DATA_JSON = JSON.parse(PACKAGE_DATA);
+  const FILE_PATH = path.resolve(__dirname, "../files/README");
+  const CONTENTS = fs.readFileSync(FILE_PATH, "utf8");
+  const UPDATED_CONTENTS = CONTENTS.replace(/#cli-url/g, PACKAGE_DATA_JSON.homepage.replace(/#readme/g, "")).replace(
+    /#cli-version/g,
+    PACKAGE_DATA_JSON.version
+  );
+  const DATA = updateNames(UPDATED_CONTENTS, directory);
+  fs.writeFileSync(path.resolve(getCurrentDirectory(directory) + "/README.md"), DATA);
 }
 
 export function createPackageJSON(appName: string) {
-  const FILE_PATH = path.resolve(__dirname, "../files/model");
+  const FILE_PATH = path.resolve(__dirname, "../files/package");
   const CONTENTS = fs.readFileSync(FILE_PATH, "utf8");
   const DATA = updateNames(CONTENTS, appName);
   fs.writeFileSync(path.resolve(getCurrentDirectory(appName) + "/package.json"), DATA);
@@ -141,8 +131,6 @@ export function createController(appName: any) {
 
 export function createControllerTs(object: { directory: string; name: string; start?: boolean }) {
   const { directory, name, start } = object;
-  console.log(start);
-
   const FILE_PATH = path.resolve(__dirname, "../files/controller");
   const CONTENTS = fs.readFileSync(FILE_PATH, "utf8");
   const updatedConstructor = CONTENTS.replace(/#constructor/g, start ? `private services: #services` : "");
