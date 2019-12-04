@@ -1,7 +1,7 @@
 import * as path from "path";
 import * as shell from "shelljs";
 import * as fs from "fs";
-import { index, tsConfig, appModule, routing } from "../json";
+import { index, routing } from "../json";
 
 export function checkCurrentDirectory(name: string) {
   const curDir = getCurrentDirectory(name);
@@ -73,7 +73,9 @@ export function createGitIgnore(appName: string) {
 }
 
 export function createTsConfig(appName: string) {
-  fs.writeFileSync(path.resolve(getCurrentDirectory(appName) + "/tsconfig.json"), JSON.stringify(tsConfig, null, 2));
+  const FILE_PATH = path.resolve(__dirname, "../files/tsconfig");
+  const CONTENTS = fs.readFileSync(FILE_PATH, "utf8");
+  fs.writeFileSync(path.resolve(getCurrentDirectory(appName) + "/tsconfig.json"), CONTENTS);
 }
 
 export function createAppModule(appName: any) {
