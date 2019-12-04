@@ -87,26 +87,9 @@ export function createAppModule(appName: any) {
 
 export function createAppRoutingModule(appName: any) {
   const workingDirectory = checkCurrentDirectory(appName + "/src");
-  const imports = routing.imports;
-  delete routing.imports;
-
-  const body = Object.keys(routing)
-    .map(key => {
-      if (key === "controllers") {
-        return `  ${key}: [SampleController]`;
-      }
-
-      if (key === "middlewares") {
-        return `  ${key}: []`;
-      }
-
-      return `  ${key}: ""`;
-    })
-    .join(",\n  ");
-  const routes = `\n\nexport const routes = [\n  {\n  ${body},\n  },\n];`;
-  const data = imports + routes;
-
-  fs.writeFileSync(path.resolve(workingDirectory + "/app.routing.module.ts"), data);
+  const FILE_PATH = path.resolve(__dirname, "../files/routing");
+  const CONTENTS = fs.readFileSync(FILE_PATH, "utf8");
+  fs.writeFileSync(path.resolve(workingDirectory + "/app.routing.module.ts"), CONTENTS);
 }
 
 export function createEnvironment(appName: any) {
