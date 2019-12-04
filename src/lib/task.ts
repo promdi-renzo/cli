@@ -49,17 +49,15 @@ export const createComponent = (component: string, directory: string) => {
   const dir_array = directory.split(/\\|\//);
   const name = dir_array[dir_array.length - 1];
 
-  checkCurrentDirectory("src");
-
-  const dir = dir_array.reduce((acc: string, cur: string) => {
-    checkCurrentDirectory(`${acc}/${cur}`);
+  const dir = dir_array.reduce((acc: string, cur: string, index: number) => {
+    checkCurrentDirectory(acc);
     return `${acc}/${cur}`;
   }, "src");
 
-  let workingDirectory = checkCurrentDirectory(dir);
+  let workingDirectory = checkCurrentDirectory("src") + `/${directory}`;
 
   if (component === "c" || component === "controller") {
-    workingDirectory += `/${directory}`;
+    workingDirectory = checkCurrentDirectory(dir) + `/${directory}`;
     tasks = createControllerTaskList(directory, name);
   }
 
