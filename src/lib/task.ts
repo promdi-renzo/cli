@@ -66,6 +66,10 @@ export const createComponent = (component: string, directory: string) => {
     tasks = createServicesTaskList(directory, name);
   }
 
+  if (component === "m" || component === "model") {
+    tasks = createModelTask(directory, name);
+  }
+
   tasks.run({ directory: workingDirectory, name }).catch((err: any) => {
     console.error(err);
   });
@@ -82,6 +86,10 @@ function createControllerTaskList(directory: string, name: string) {
 
 function createServicesTaskList(directory: string, name: string) {
   return new Listr([{ title: taskTitle("create", `src/${directory}/${name}.service.ts`), task: createServiceTs }]);
+}
+
+function createModelTask(directory: string, name: string) {
+  return new Listr([{ title: taskTitle("create", `src/${directory}/${name}.service.ts`), task: createModelTs }]);
 }
 
 function taskTitle(type: string, value: string) {
