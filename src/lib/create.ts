@@ -1,7 +1,7 @@
 import * as path from "path";
 import * as shell from "shelljs";
 import * as fs from "fs";
-import { index, readme, packageJSON, tsConfig, appModule, routing, controller } from "../json";
+import { index, readme, tsConfig, appModule, routing } from "../json";
 
 export function checkCurrentDirectory(name: string) {
   const curDir = getCurrentDirectory(name);
@@ -134,42 +134,29 @@ export function createEnvironment(appName: any) {
 export function createController(appName: any) {
   checkCurrentDirectory(appName + "/src/controllers");
   const workingDirectory = checkCurrentDirectory(appName + "/src/controllers/sample");
-  createControllerTs({ directory: workingDirectory, name: "sample" });
+  createControllerTs({ directory: workingDirectory, name: "sample", start: true });
   createModelTs({ directory: workingDirectory, name: "sample" });
   createServiceTs({ directory: workingDirectory, name: "sample" });
 }
 
-export function createControllerTs(object: { directory: string; name: string }) {
-  const { directory, name } = object;
-  const imports = controller.imports.join("\n");
-  const decorator =
-    "@Controller(" +
-    JSON.stringify(controller["decorator"], null, 2)
-      .replace(/\"model\"/g, "model")
-      .replace(/\"route\"/g, "route") +
-    ")";
+export function createControllerTs(object: { directory: string; name: string; start?: boolean }) {
+  const { directory, name, start } = object;
+  console.log(start);
 
-  const body = controller["body"]
-    .map((val: string, index: number) => {
-      if (index <= 1) {
-        val += "\n";
-      }
-
-      if (index >= 1 && index < 5) {
-        const spaces = "  ";
-        val = (index === 4 ? spaces + spaces : spaces) + val;
-      }
-
-      return val;
-    })
-    .join("\n");
-
-  const data = imports + "\n\n" + decorator + "\n" + body;
-  const updatedSerices = updateServicesName(data, name);
-  const updatedController = updateControllersName(updatedSerices, name);
+  const FILE_PATH = path.resolve(__dirname, "../files/controller");
+  const CONTENTS = fs.readFileSync(FILE_PATH, "utf8");
+  const updatedConstructor = CONTENTS.replace(/#constructor/g, start ? `private services: #services` : "");
+  const methodData = [
+    '@Get({ path: "/", middlewares: [] })\n',
+    "  root(req: Request, res: Response, next: NextFunction): void {\n",
+    "  res.send(this.services.hello());\n  }",
+  ].join("");
+  const updatedMethod = updatedConstructor.replace(/#method/g, start ? methodData : "");
+  const updatedServices = start ? updateServicesImport(updatedMethod, name) : updatedMethod.replace(/#services/g, "");
+  const updatedController = updateControllersName(updatedServices, name);
   const updatedModel = updateModelsName(updatedController, name);
-  const updatedNames = updateNames(updatedModel, name);
-  fs.writeFileSync(path.resolve(directory + `/${name}.controller.ts`), updatedNames);
+  const DATA = updateNames(updatedModel, name);
+  fs.writeFileSync(path.resolve(directory + `/${name}.controller.ts`), DATA);
 }
 
 export function createModelTs(object: { directory: string; name: string }) {
@@ -191,6 +178,12 @@ export function createServiceTs(object: { directory: string; name: string }) {
 
 function upperCaseFirstLetter(word: string) {
   return word.replace(/^\w/, c => c.toUpperCase());
+}
+
+function updateServicesImport(word: string, name: string) {
+  const services = upperCaseFirstLetter(name) + "Services";
+  const importStatement = `import { ${services} } from "./${name}.service"`;
+  return word.replace(/#services/g, importStatement);
 }
 
 function updateServicesName(word: string, name: string) {
