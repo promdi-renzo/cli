@@ -126,7 +126,7 @@ export function createController(appName: any) {
   const workingDirectory = checkCurrentDirectory(appName + "/src/controllers/sample");
   createControllerTs({ directory: workingDirectory, name: "sample", start: true });
   createModelTs({ directory: workingDirectory, name: "sample" });
-  createServiceTs({ directory: workingDirectory, name: "sample" });
+  createServiceTs({ directory: workingDirectory, name: "sample", start: true });
 }
 
 export function createControllerTs(object: { directory: string; name: string; start?: boolean }) {
@@ -156,11 +156,13 @@ export function createModelTs(object: { directory: string; name: string }) {
   fs.writeFileSync(path.resolve(directory + `/${name}.model.ts`), DATA);
 }
 
-export function createServiceTs(object: { directory: string; name: string }) {
-  const { directory, name } = object;
+export function createServiceTs(object: { directory: string; name: string; start?: boolean }) {
+  const { directory, name, start = false } = object;
   const FILE_PATH = path.resolve(__dirname, "../files/service");
   const CONTENTS = fs.readFileSync(FILE_PATH, "utf8");
-  const updatedSerices = updateServicesName(CONTENTS, name);
+  const methodData = ["\nhello() {\n  ", '  return "Hello world!";\n  ', "}\n", "}"].join("");
+  const updatedMethod = CONTENTS.replace(/#method/g, start ? methodData : "");
+  const updatedSerices = updateServicesName(updatedMethod, name);
   const DATA = updateNames(updatedSerices, name);
   fs.writeFileSync(path.resolve(directory + `/${name}.service.ts`), DATA);
 }
