@@ -49,21 +49,24 @@ export const createComponent = (component: string, directory: string) => {
   const dir_array = directory.split(/\\|\//);
   const name = dir_array[dir_array.length - 1];
 
-  checkCurrentDirectory("src");
-
-  const dir = dir_array.reduce((acc: string, cur: string) => {
-    checkCurrentDirectory(`${acc}/${cur}`);
+  const dir = dir_array.reduce((acc: string, cur: string, index: number) => {
+    checkCurrentDirectory(acc);
     return `${acc}/${cur}`;
   }, "src");
 
-  const workingDirectory = checkCurrentDirectory(dir);
+  let workingDirectory = checkCurrentDirectory("src") + `/${directory}`;
 
   if (component === "c" || component === "controller") {
+    workingDirectory = checkCurrentDirectory(dir) + `/${directory}`;
     tasks = createControllerTaskList(directory, name);
   }
 
   if (component === "s" || component === "services") {
     tasks = createServicesTaskList(directory, name);
+  }
+
+  if (component === "m" || component === "model") {
+    tasks = createModelTask(directory, name);
   }
 
   tasks.run({ directory: workingDirectory, name }).catch((err: any) => {
@@ -82,6 +85,10 @@ function createControllerTaskList(directory: string, name: string) {
 
 function createServicesTaskList(directory: string, name: string) {
   return new Listr([{ title: taskTitle("create", `src/${directory}/${name}.service.ts`), task: createServiceTs }]);
+}
+
+function createModelTask(directory: string, name: string) {
+  return new Listr([{ title: taskTitle("create", `src/${directory}/${name}.service.ts`), task: createModelTs }]);
 }
 
 function taskTitle(type: string, value: string) {
