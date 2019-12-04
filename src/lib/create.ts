@@ -182,23 +182,11 @@ export function createModelTs(object: { directory: string; name: string }) {
 
 export function createServiceTs(object: { directory: string; name: string }) {
   const { directory, name } = object;
-  const imports = services.imports.join("\n");
-  const body = services.body
-    .map((value: string, index: number) => {
-      const spaces = "  ";
-      if (index >= 2 && index <= 5) {
-        value = (index === 4 ? spaces + spaces : spaces) + value;
-        value = value + (index === 2 ? "\n" : "");
-      }
-
-      return value;
-    })
-    .join("\n");
-  const data = imports + "\n\n" + body;
-  const updatedSerices = updateServicesName(data, name);
-  const updatedNames = updateNames(updatedSerices, name);
-
-  fs.writeFileSync(path.resolve(directory + `/${name}.service.ts`), updatedNames);
+  const FILE_PATH = path.resolve(__dirname, "../files/service");
+  const CONTENTS = fs.readFileSync(FILE_PATH, "utf8");
+  const updatedSerices = updateServicesName(CONTENTS, name);
+  const DATA = updateNames(updatedSerices, name);
+  fs.writeFileSync(path.resolve(directory + `/${name}.service.ts`), DATA);
 }
 
 function upperCaseFirstLetter(word: string) {
