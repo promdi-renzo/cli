@@ -3,7 +3,7 @@ import * as figlet from "figlet";
 import * as chalk from "chalk";
 
 // TASKS
-import { createProject, createComponent, runServer } from "./task";
+import { createProject, createComponent, runServer, buildProject } from "./task";
 
 // INTERFACE
 interface NpmPackage {
@@ -60,6 +60,15 @@ export default function runCLI(npm: NpmPackage) {
     `
     )
     .action(runServer);
+
+  program
+    .command("build")
+    .alias("b")
+    .description(
+      `Build project.
+    ${chalk.green("maya build")} | ${chalk.green("maya b")}`
+    )
+    .action(buildProject);
 
   program.parse(process.argv);
 
