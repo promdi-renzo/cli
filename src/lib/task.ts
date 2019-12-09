@@ -51,7 +51,7 @@ export const createComponent = (component: string, directory: string) => {
     checkCurrentDirectory(acc);
     return `${acc}/${cur}`;
   }, "src");
-  const isRoute = component === "c" || component === "controller";
+  const isRoute = component === "r" || component === "route";
   const currentDirectory = isRoute ? dir : "src";
   const filename = isRoute ? `/${name}` : `/${directory}`;
   const workingDirectory = checkCurrentDirectory(currentDirectory) + filename;
@@ -64,6 +64,10 @@ export const createComponent = (component: string, directory: string) => {
 
 function chooseComponent(component: string, directory: string, name: string): Listr<any> {
   let tasks = new Listr([]);
+
+  if (component === "r" || component === "route") {
+    tasks = createRoutesTaskList(directory, name);
+  }
 
   if (component === "c" || component === "controller") {
     tasks = createControllerTaskList(directory, name);
@@ -80,13 +84,17 @@ function chooseComponent(component: string, directory: string, name: string): Li
   return tasks;
 }
 
-function createControllerTaskList(directory: string, name: string) {
+function createRoutesTaskList(directory: string, name: string) {
   const workingDirectory = `src/${directory}/${name}`;
   return new Listr([
     { title: taskTitle("create", `${workingDirectory}.controller.ts`), task: createControllerTs },
     { title: taskTitle("create", `${workingDirectory}.model.ts`), task: createModelTs },
     { title: taskTitle("create", `${workingDirectory}.service.ts`), task: createServiceTs },
   ]);
+}
+
+function createControllerTaskList(directory: string, name: string) {
+  return new Listr([{ title: taskTitle("create", `src/${directory}/${name}.controller.ts`), task: createControllerTs }]);
 }
 
 function createServicesTaskList(directory: string, name: string) {
