@@ -45,19 +45,27 @@ export const createProject = (directory: string) => {
 };
 
 export const createComponent = (component: string, directory: string) => {
-  let tasks = new Listr([]);
   const dir_array = directory.split(/\\|\//);
   const name = dir_array[dir_array.length - 1];
-
   const dir = dir_array.reduce((acc: string, cur: string, index: number) => {
     checkCurrentDirectory(acc);
     return `${acc}/${cur}`;
   }, "src");
+  const isRoute = component === "c" || component === "controller";
+  const currentDirectory = isRoute ? dir : "src";
+  const filename = isRoute ? `/${name}` : `/${directory}`;
+  const workingDirectory = checkCurrentDirectory(currentDirectory) + filename;
+  const tasks = chooseComponent(component, directory, name);
 
-  let workingDirectory = checkCurrentDirectory("src") + `/${directory}`;
+  tasks.run({ directory: workingDirectory, name }).catch((err: any) => {
+    console.error(err);
+  });
+};
+
+function chooseComponent(component: string, directory: string, name: string): Listr<any> {
+  let tasks = new Listr([]);
 
   if (component === "c" || component === "controller") {
-    workingDirectory = checkCurrentDirectory(dir) + `/${name}`;
     tasks = createControllerTaskList(directory, name);
   }
 
@@ -69,10 +77,8 @@ export const createComponent = (component: string, directory: string) => {
     tasks = createModelTask(directory, name);
   }
 
-  tasks.run({ directory: workingDirectory, name }).catch((err: any) => {
-    console.error(err);
-  });
-};
+  return tasks;
+}
 
 function createControllerTaskList(directory: string, name: string) {
   const workingDirectory = `src/${directory}/${name}`;
