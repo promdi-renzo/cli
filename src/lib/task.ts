@@ -1,4 +1,4 @@
-import * as Listr from "listr";
+import Listr from "listr";
 import {
   createIndex,
   createReadMe,
@@ -18,9 +18,8 @@ import {
   installDependency,
 } from "./create";
 import { serve } from "./serve";
-import * as chalk from "chalk";
-import { exec } from "child_process";
-import * as util from "util";
+import { build, cleanOutDir } from "./build";
+import chalk from "chalk";
 
 export const createProject = (directory: string) => {
   checkCurrentDirectory(directory);
@@ -45,19 +44,31 @@ export const createProject = (directory: string) => {
 };
 
 export const createComponent = (component: string, directory: string) => {
-  let tasks = new Listr([]);
   const dir_array = directory.split(/\\|\//);
   const name = dir_array[dir_array.length - 1];
-
   const dir = dir_array.reduce((acc: string, cur: string, index: number) => {
     checkCurrentDirectory(acc);
     return `${acc}/${cur}`;
   }, "src");
+  const isRoute = component === "r" || component === "route";
+  const currentDirectory = isRoute ? dir : "src";
+  const filename = isRoute ? `/${name}` : `/${directory}`;
+  const workingDirectory = checkCurrentDirectory(currentDirectory) + filename;
+  const tasks = chooseComponent(component, directory, name);
 
-  let workingDirectory = checkCurrentDirectory("src") + `/${directory}`;
+  tasks.run({ directory: workingDirectory, name }).catch((err: any) => {
+    console.error(err);
+  });
+};
+
+function chooseComponent(component: string, directory: string, name: string): Listr<any> {
+  let tasks = new Listr([]);
+
+  if (component === "r" || component === "route") {
+    tasks = createRoutesTaskList(directory, name);
+  }
 
   if (component === "c" || component === "controller") {
-    workingDirectory = checkCurrentDirectory(dir) + `/${directory}`;
     tasks = createControllerTaskList(directory, name);
   }
 
@@ -69,18 +80,20 @@ export const createComponent = (component: string, directory: string) => {
     tasks = createModelTask(directory, name);
   }
 
-  tasks.run({ directory: workingDirectory, name }).catch((err: any) => {
-    console.error(err);
-  });
-};
+  return tasks;
+}
 
-function createControllerTaskList(directory: string, name: string) {
+function createRoutesTaskList(directory: string, name: string) {
   const workingDirectory = `src/${directory}/${name}`;
   return new Listr([
     { title: taskTitle("create", `${workingDirectory}.controller.ts`), task: createControllerTs },
     { title: taskTitle("create", `${workingDirectory}.model.ts`), task: createModelTs },
     { title: taskTitle("create", `${workingDirectory}.service.ts`), task: createServiceTs },
   ]);
+}
+
+function createControllerTaskList(directory: string, name: string) {
+  return new Listr([{ title: taskTitle("create", `src/${directory}/${name}.controller.ts`), task: createControllerTs }]);
 }
 
 function createServicesTaskList(directory: string, name: string) {
@@ -106,17 +119,28 @@ function taskTitle(type: string, value: string) {
 }
 
 export async function runServer(cmd: any, options: any) {
-  const port = cmd.port ? cmd.port : 3333;
   try {
-    const execute = util.promisify(exec);
-    const { stdout } = await execute(`netstat -ano | findstr :${port}`);
-    const portUsed = stdout
-      .replace(/\r?\n|\r/g, "")
-      .split(" ")
-      .filter(Boolean)
-      .slice(-1)[0];
-    console.log(`PORT ${port} on ${portUsed} is already in use!!!`);
-    await execute(`taskkill /PID ${portUsed} /F`);
-  } catch (error) {}
-  serve(port);
+    cleanOutDir({ outDir: process.cwd() + "/dist" });
+    serve(cmd.port ? cmd.port : 3333);
+  } catch (error) {
+    console.log(error.message);
+    process.exit();
+  }
+}
+
+export function buildProject() {
+  let tasks = new Listr([]);
+
+  const cwd = process.cwd();
+  const options = {
+    rootDir: `${cwd}/src`,
+    outDir: `${cwd}/dist`,
+    project: `${cwd}/tsconfig.json`,
+  };
+
+  tasks = new Listr([{ title: taskTitle("execute", `Clean dist folder`), task: cleanOutDir }, { title: taskTitle("execute", `Build project`), task: build }]);
+
+  tasks.run(options).catch((err: any) => {
+    console.error(err);
+  });
 }

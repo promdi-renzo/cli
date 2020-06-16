@@ -1,9 +1,9 @@
-import * as program from "commander";
-import * as figlet from "figlet";
-import * as chalk from "chalk";
+import program from "commander";
+import figlet from "figlet";
+import chalk from "chalk";
 
 // TASKS
-import { createProject, createComponent, runServer } from "./task";
+import { createProject, createComponent, runServer, buildProject } from "./task";
 
 // INTERFACE
 interface NpmPackage {
@@ -34,6 +34,8 @@ export default function runCLI(npm: NpmPackage) {
     .description(
       `Creates a new component.
  
+    ROUTE
+    ${chalk.green("maya generate route sample")} | ${chalk.green("maya g r sample\n")}
     CONTROLLER
     ${chalk.green("maya generate controller sample")} | ${chalk.green("maya g c sample\n")}
     SERVICE
@@ -58,6 +60,15 @@ export default function runCLI(npm: NpmPackage) {
     `
     )
     .action(runServer);
+
+  program
+    .command("build")
+    .alias("b")
+    .description(
+      `Build project.
+    ${chalk.green("maya build")} | ${chalk.green("maya b")}`
+    )
+    .action(buildProject);
 
   program.parse(process.argv);
 
