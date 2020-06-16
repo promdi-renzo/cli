@@ -1,4 +1,4 @@
-import * as Listr from "listr";
+import Listr from "listr";
 import {
   createIndex,
   createReadMe,
@@ -19,9 +19,7 @@ import {
 } from "./create";
 import { serve } from "./serve";
 import { build, cleanOutDir } from "./build";
-import * as chalk from "chalk";
-import { exec } from "child_process";
-import * as util from "util";
+import chalk from "chalk";
 
 export const createProject = (directory: string) => {
   checkCurrentDirectory(directory);
@@ -121,20 +119,12 @@ function taskTitle(type: string, value: string) {
 }
 
 export async function runServer(cmd: any, options: any) {
-  const port = cmd.port ? cmd.port : 3333;
   try {
     cleanOutDir({ outDir: process.cwd() + "/dist" });
-    const execute = util.promisify(exec);
-    const { stdout } = await execute(`netstat -ano | findstr :${port}`);
-    const portUsed = stdout
-      .replace(/\r?\n|\r/g, "")
-      .split(" ")
-      .filter(Boolean)
-      .slice(-1)[0];
-    console.log(`PORT ${port} on ${portUsed} is already in use!!!`);
-    await execute(`taskkill /PID ${portUsed} /F`);
-  } catch (error) {}
-  serve(port);
+    serve(cmd.port ? cmd.port : 3333);
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 export function buildProject() {
@@ -147,10 +137,7 @@ export function buildProject() {
     project: `${cwd}/tsconfig.json`,
   };
 
-  tasks = new Listr([
-    { title: taskTitle("execute", `Clean dist folder`), task: cleanOutDir },
-    { title: taskTitle("execute", `Build project`), task: build },
-  ]);
+  tasks = new Listr([{ title: taskTitle("execute", `Clean dist folder`), task: cleanOutDir }, { title: taskTitle("execute", `Build project`), task: build }]);
 
   tasks.run(options).catch((err: any) => {
     console.error(err);
