@@ -1,6 +1,7 @@
 import * as shell from "shelljs";
 import ts from "typescript";
 import chalk from "chalk";
+import fs from "fs";
 import { errorMessage } from "./utils";
 
 export function build(options: ts.CompilerOptions): void {
@@ -9,17 +10,22 @@ export function build(options: ts.CompilerOptions): void {
   let program = ts.createProgram(["src/index.ts"], options);
   let emitResult = program.emit();
   let allDiagnostics = ts.getPreEmitDiagnostics(program).concat(emitResult.diagnostics);
+  let message = "";
 
   allDiagnostics.forEach(diagnostic => {
     console.log("\n", errorMessage(diagnostic), "\n");
   });
 
+
   if (allDiagnostics.length > 0) {
-    console.log(chalk.green(`[mayajs] Build finished with ${allDiagnostics.length} error${allDiagnostics.length > 1 ? "s" : ""}!`));
+    message = ` with ${allDiagnostics.length} error${allDiagnostics.length > 1 ? "s" : ""}`;
   } else {
-    console.log(chalk.green("[mayajs] Build finished!"));
+    fs.copyFile("package.json", "dist/package.json", err => {
+      if (err) throw err;
+    });
   }
 
+  console.log(chalk.green(`[mayajs] Build finished${message}!`));
   process.exit(0);
 }
 
