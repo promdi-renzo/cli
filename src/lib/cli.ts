@@ -1,6 +1,6 @@
-import * as program from "commander";
-import * as figlet from "figlet";
-import * as chalk from "chalk";
+import program from "commander";
+import figlet from "figlet";
+import chalk from "chalk";
 
 // TASKS
 import { createProject, createComponent, runServer, buildProject } from "./task";
