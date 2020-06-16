@@ -123,7 +123,8 @@ export async function runServer(cmd: any, options: any) {
     cleanOutDir({ outDir: process.cwd() + "/dist" });
     serve(cmd.port ? cmd.port : 3333);
   } catch (error) {
-    console.log(error);
+    console.log(error.message);
+    process.exit();
   }
 }
 
