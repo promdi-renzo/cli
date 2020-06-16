@@ -136,6 +136,10 @@ export function buildProject() {
     rootDir: `${cwd}/src`,
     outDir: `${cwd}/dist`,
     project: `${cwd}/tsconfig.json`,
+    experimentalDecorators: true,
+    emitDecoratorMetadata: true,
+    target: "ES5",
+    esModuleInterop: true,
   };
 
   tasks = new Listr([{ title: taskTitle("execute", `Clean dist folder`), task: cleanOutDir }, { title: taskTitle("execute", `Build project`), task: build }]);

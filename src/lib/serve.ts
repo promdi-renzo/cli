@@ -2,7 +2,7 @@ import chalk from "chalk";
 import ts from "typescript";
 import { spawn } from "child_process";
 import util from "util";
-import path from "path";
+import { errorMessage } from "./utils";
 import fs = require("fs");
 
 const exec = util.promisify(require("child_process").exec);
@@ -18,13 +18,7 @@ const formatHost: ts.FormatDiagnosticsHost = {
 
 function reportDiagnostic(diagnostic: ts.Diagnostic) {
   hasBuildError = true;
-  if (diagnostic.file) {
-    let { line, character } = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start!);
-    let message = ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n");
-    console.log("Error", diagnostic.code, ":", `${path.basename(diagnostic.file.fileName)} (${line + 1},${character + 1}):`, chalk.red(message));
-  } else {
-    console.error("Error", diagnostic.code, ":", ts.flattenDiagnosticMessageText(diagnostic.messageText, formatHost.getNewLine()));
-  }
+  console.log(errorMessage(diagnostic));
 }
 
 function reportWatchStatusChanged(diagnostic: ts.Diagnostic) {
