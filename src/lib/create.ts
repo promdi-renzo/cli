@@ -101,7 +101,7 @@ export function createController(appName: any) {
 export function createControllerTs(object: { directory: string; name: string; start?: boolean }) {
   const { directory, name, start } = object;
   const CONTENTS = getContentsUTF8FromDirname("../files/controller");
-  const services = upperCaseFirstLetter(name) + "Services";
+  const services = upperCaseWordWithDashes(name) + "Services";
   const updatedConstructor = CONTENTS.replace(/#constructor/g, start ? `private services: ${services}` : "");
   const methodData = [
     '\n  @Get({ path: "/", middlewares: [] })\n',
@@ -133,23 +133,26 @@ export function createServiceTs(object: { directory: string; name: string; start
   fs.writeFileSync(path.resolve(`${directory}.service.ts`), DATA);
 }
 
-function upperCaseFirstLetter(word: string) {
-  return word.replace(/^\w/, c => c.toUpperCase());
+function upperCaseWordWithDashes(word: string) {
+  const firstLetter = word.replace(/^\w/, c => c.toUpperCase());
+  const dashedLetter = firstLetter.replace(/-\w/g, c => c.toUpperCase());
+  const noDashes = dashedLetter.replace(/-/g, "");
+  return noDashes;
 }
 
 function updateServicesImport(word: string, name: string) {
-  const services = upperCaseFirstLetter(name) + "Services";
+  const services = upperCaseWordWithDashes(name) + "Services";
   const importStatement = `import { ${services} } from "./${name}.service"\n`;
   return word.replace(/#services/g, importStatement);
 }
 
 function updateServicesName(word: string, name: string) {
-  const services = upperCaseFirstLetter(name) + "Services";
+  const services = upperCaseWordWithDashes(name) + "Services";
   return word.replace(/#services/g, services);
 }
 
 function updateControllersName(word: string, name: string) {
-  const controller = upperCaseFirstLetter(name) + "Controller";
+  const controller = upperCaseWordWithDashes(name) + "Controller";
   return word.replace(/#controller/g, controller);
 }
 
@@ -158,7 +161,7 @@ function updateModelsName(word: string, name: string) {
 }
 
 function updateNames(word: string, name: string) {
-  return word.replace(/#name/g, name).replace(/#Name/g, upperCaseFirstLetter(name));
+  return word.replace(/#name/g, name).replace(/#Name/g, upperCaseWordWithDashes(name));
 }
 
 function getContentsUTF8FromDirname(relativePath: string) {

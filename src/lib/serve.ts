@@ -41,6 +41,75 @@ function spawnCommand(port: number) {
   });
 }
 
+function taskKill(port: number) {
+  return (data: any) => {
+    if (data.stdout) {
+      const portUsed = data.stdout
+        .replace(/\r?\n|\r/g, "")
+        .split(" ")
+        .filter(Boolean)
+        .slice(-1)[0];
+
+      console.log(chalk.yellow(`[mayajs] Port ${port} is already use.`));
+      return exec(`taskkill /PID ${portUsed} /F`);
+    }
+  };
+}
+
+async function killUsedPort(port: number, tries = 1): Promise<any> {
+  return new Promise((resolve: any, reject: any) => {
+    const portTerminated = (data: any) => {
+      if (data.stdout.includes("SUCCESS")) {
+        console.log(chalk.yellow(`[mayajs] Port ${port} is now teminated and ready to use.`));
+        return resolve();
+      }
+
+      throw new Error("taskkill not completed");
+    };
+
+    const catchError = (error: any): void | Promise<any> => {
+      const message = error.message ? error.message : error;
+
+      if (message.includes("netstat")) {
+        return resolve();
+      }
+
+      if (tries > 3) {
+        console.log(chalk.red(message));
+        return killUsedPort(port);
+      }
+    };
+
+    exec(`netstat -ano | findstr :${port}`)
+      .then(taskKill(port))
+      .then(portTerminated)
+      .catch(catchError);
+  });
+}
+
+function runProgram(port: number) {
+  return () => {
+    spawnCommand(port);
+
+    if (!hasLoaded && !hasBuildError) {
+      hasLoaded = true;
+      console.log(chalk.green(`\n** MAYA Live Development Server is running on`), `http://localhost:${port}/`, chalk.green("**\n"));
+    }
+  };
+}
+
+function restart(port: number, origPostProgramCreate: ((program: ts.SemanticDiagnosticsBuilderProgram) => void) | undefined) {
+  return (program: ts.SemanticDiagnosticsBuilderProgram) => {
+    console.log(chalk.yellow("[mayajs] Compilation completed."));
+    origPostProgramCreate!(program);
+    if (!hasBuildError) {
+      killUsedPort(port).finally(runProgram(port));
+    } else {
+      process.exit(0);
+    }
+  };
+}
+
 export function serve(port: number) {
   const json = JSON.parse(fs.readFileSync("package.json", "utf8"));
   const dependencies = json.dependencies;
@@ -68,34 +137,7 @@ export function serve(port: number) {
   };
 
   const origPostProgramCreate = host.afterProgramCreate;
-
-  host.afterProgramCreate = program => {
-    console.log(chalk.yellow("[mayajs] Compilation completed."));
-    origPostProgramCreate!(program);
-    if (!hasBuildError) {
-      exec(`netstat -ano | findstr :${port}`)
-        .then((data: any) => {
-          if (data.stdout) {
-            const portUsed = data.stdout
-              .replace(/\r?\n|\r/g, "")
-              .split(" ")
-              .filter(Boolean)
-              .slice(-1)[0];
-
-            return exec(`taskkill /PID ${portUsed} /F`);
-          }
-        })
-        .catch(() => {})
-        .finally(() => {
-          spawnCommand(port);
-        });
-    }
-
-    if (!hasLoaded && !hasBuildError) {
-      hasLoaded = true;
-      console.log(chalk.green(`\n** MAYA Live Development Server is running on`), `http://localhost:${port}/`, chalk.green("**\n"));
-    }
-  };
+  host.afterProgramCreate = restart(port, origPostProgramCreate);
 
   ts.createWatchProgram(host);
 }

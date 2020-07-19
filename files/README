@@ -4,12 +4,12 @@ This project was created with [MayaJS CLI](#cli-url) version #cli-version.
 
 ## Development server
 
-Run `maya serve` to run the server. Navigate to `http://localhost:3333`. Hot reload will watch for file changes and restart the server.
+Run `maya serve` or `maya s` to run the server. Navigate to `http://localhost:3333`. Hot reload will watch for file changes and restart the server.
 
 ## Code scaffolding
 
-Run `maya create <service|controller|model> <name|directory>` to create a new component.
+Run `maya create <service | controller | model > < name | directory >` to create a new component.
 
 ## Build
 
-Run `maya build` to build the project. Use the `--prod` flag for a production build. The build files will be created in the `dist/` directory.
+Run `maya build` or `maya b` to build the project. Use the `--prod` flag for a production build. The build files will be created in the `dist/` directory.
