@@ -87,19 +87,25 @@ async function killUsedPort(port: number, tries = 1): Promise<any> {
   });
 }
 
+function runProgram(port: number) {
+  return () => {
+    spawnCommand(port);
+
+    if (!hasLoaded && !hasBuildError) {
+      hasLoaded = true;
+      console.log(chalk.green(`\n** MAYA Live Development Server is running on`), `http://localhost:${port}/`, chalk.green("**\n"));
+    }
+  };
+}
+
 function restart(port: number, origPostProgramCreate: ((program: ts.SemanticDiagnosticsBuilderProgram) => void) | undefined) {
   return (program: ts.SemanticDiagnosticsBuilderProgram) => {
     console.log(chalk.yellow("[mayajs] Compilation completed."));
     origPostProgramCreate!(program);
     if (!hasBuildError) {
-      killUsedPort(port).finally(() => {
-        spawnCommand(port);
-
-        if (!hasLoaded && !hasBuildError) {
-          hasLoaded = true;
-          console.log(chalk.green(`\n** MAYA Live Development Server is running on`), `http://localhost:${port}/`, chalk.green("**\n"));
-        }
-      });
+      killUsedPort(port).finally(runProgram(port));
+    } else {
+      process.exit(0);
     }
   };
 }
