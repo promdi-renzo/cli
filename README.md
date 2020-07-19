@@ -8,6 +8,7 @@ The MayaJS CLI is a command line interface for MayaJS. Its primary purpose is to
 
 - [maya new](#new)
 - [maya serve](#serve)
+- [maya build](#build)
 - [maya generate](#generate)
 
 # Installation
@@ -18,7 +19,7 @@ In order to start using MayaJS CLI you need to install it globally.
 
 ## NEW
 
-> new|n <directory>
+> new | n <directory>
 
 Create a new MayaJS project. This will generate all the basic files and install all the necessary dependencies for your MayaJS Project.
 
@@ -28,11 +29,15 @@ Create a new MayaJS project. This will generate all the basic files and install 
 
 ## GENERATE
 
-> generate|g <component> <directory>
+> generate | g <component> <directory>
 
 This will help you generate components inside your MayaJS project. You can generate controllers, sevices and models using this command.
 
 ### Usage
+
+#### ROUTES
+
+`maya generate route sample` or `maya g r sample`
 
 #### CONTROLLER
 
@@ -48,7 +53,7 @@ This will help you generate components inside your MayaJS project. You can gener
 
 ## SERVE
 
-> serve|s [options]
+> serve | s [options]
 
 This will run your MayaJS project which listens on port `3333` by default. In case where port `3333` is already in use or you want to run it on a different port number, use `--port` to specify a different port.
 
@@ -56,8 +61,20 @@ This will run your MayaJS project which listens on port `3333` by default. In ca
 
 #### DEFAULT
 
-`maya serve` or `sh maya s`
+`maya serve` or `maya s`
 
 #### CHANGE PORT
 
 `maya serve --port 4444` or `maya s -p 4444`
+
+## BUILD
+
+> build | b
+
+This will build your MayaJS project to javascript that you can deploy to your prefered cloud hosting. The output files will be inside the `dist` folder.
+
+### Usage
+
+#### DEFAULT
+
+`maya build` or `maya b`
