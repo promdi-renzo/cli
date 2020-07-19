@@ -55,30 +55,35 @@ function taskKill(port: number) {
     }
   };
 }
+
 async function killUsedPort(port: number, tries = 1): Promise<any> {
   return new Promise((resolve: any, reject: any) => {
+    const portTerminated = (data: any) => {
+      if (data.stdout.includes("SUCCESS")) {
+        console.log(chalk.yellow(`[mayajs] Port ${port} is now teminated and ready to use.`));
+        return resolve();
+      }
+
+      throw new Error("taskkill not completed");
+    };
+
+    const catchError = (error: any): void | Promise<any> => {
+      const message = error.message ? error.message : error;
+
+      if (message.includes("netstat")) {
+        return resolve();
+      }
+
+      if (tries > 3) {
+        console.log(chalk.red(message));
+        return killUsedPort(port);
+      }
+    };
+
     exec(`netstat -ano | findstr :${port}`)
       .then(taskKill(port))
-      .then((data: any) => {
-        if (data.stdout.includes("SUCCESS")) {
-          console.log(chalk.yellow(`[mayajs] Port ${port} is now teminated and ready to use.`));
-          return resolve();
-        }
-
-        throw new Error("taskkill not completed");
-      })
-      .catch((error: any): void | Promise<any> => {
-        const message = error.message ? error.message : error;
-
-        if (message.includes("netstat")) {
-          return resolve();
-        }
-
-        if (tries > 3) {
-          console.log(chalk.red(message));
-          return killUsedPort(port);
-        }
-      });
+      .then(portTerminated)
+      .catch(catchError);
   });
 }
 
