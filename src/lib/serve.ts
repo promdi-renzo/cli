@@ -41,32 +41,55 @@ function spawnCommand(port: number) {
   });
 }
 
+async function killUsedPort(port: number, tries = 1): Promise<any> {
+  return new Promise((resolve: any, reject: any) => {
+    exec(`netstat -ano | findstr :${port}`)
+      .then((data: any) => {
+        if (data.stdout) {
+          const portUsed = data.stdout
+            .replace(/\r?\n|\r/g, "")
+            .split(" ")
+            .filter(Boolean)
+            .slice(-1)[0];
+
+          return exec(`taskkill /PID ${portUsed} /F`);
+        }
+      })
+      .then((data: any) => {
+        if (data.stdout.includes("SUCCESS")) {
+          return resolve();
+        }
+
+        throw new Error("taskkill not completed");
+      })
+      .catch((error: any): void | Promise<any> => {
+        const message = error.message ? error.message : error;
+
+        if (message.includes("netstat")) {
+          return resolve();
+        }
+
+        if (tries > 3) {
+          console.log(chalk.red(message));
+          return killUsedPort(port);
+        }
+      });
+  });
+}
+
 function restart(port: number, origPostProgramCreate: ((program: ts.SemanticDiagnosticsBuilderProgram) => void) | undefined) {
   return (program: ts.SemanticDiagnosticsBuilderProgram) => {
     console.log(chalk.yellow("[mayajs] Compilation completed."));
     origPostProgramCreate!(program);
     if (!hasBuildError) {
-      exec(`netstat -ano | findstr :${port}`)
-        .then((data: any) => {
-          if (data.stdout) {
-            const portUsed = data.stdout
-              .replace(/\r?\n|\r/g, "")
-              .split(" ")
-              .filter(Boolean)
-              .slice(-1)[0];
+      killUsedPort(port).finally(() => {
+        spawnCommand(port);
 
-            return exec(`taskkill /PID ${portUsed} /F`);
-          }
-        })
-        .catch(() => {})
-        .finally(() => {
-          spawnCommand(port);
-        });
-    }
-
-    if (!hasLoaded && !hasBuildError) {
-      hasLoaded = true;
-      console.log(chalk.green(`\n** MAYA Live Development Server is running on`), `http://localhost:${port}/`, chalk.green("**\n"));
+        if (!hasLoaded && !hasBuildError) {
+          hasLoaded = true;
+          console.log(chalk.green(`\n** MAYA Live Development Server is running on`), `http://localhost:${port}/`, chalk.green("**\n"));
+        }
+      });
     }
   };
 }
