@@ -41,22 +41,27 @@ function spawnCommand(port: number) {
   });
 }
 
+function taskKill(port: number) {
+  return (data: any) => {
+    if (data.stdout) {
+      const portUsed = data.stdout
+        .replace(/\r?\n|\r/g, "")
+        .split(" ")
+        .filter(Boolean)
+        .slice(-1)[0];
+
+      console.log(chalk.yellow(`[mayajs] Port ${port} is already use.`));
+      return exec(`taskkill /PID ${portUsed} /F`);
+    }
+  };
+}
 async function killUsedPort(port: number, tries = 1): Promise<any> {
   return new Promise((resolve: any, reject: any) => {
     exec(`netstat -ano | findstr :${port}`)
-      .then((data: any) => {
-        if (data.stdout) {
-          const portUsed = data.stdout
-            .replace(/\r?\n|\r/g, "")
-            .split(" ")
-            .filter(Boolean)
-            .slice(-1)[0];
-
-          return exec(`taskkill /PID ${portUsed} /F`);
-        }
-      })
+      .then(taskKill(port))
       .then((data: any) => {
         if (data.stdout.includes("SUCCESS")) {
+          console.log(chalk.yellow(`[mayajs] Port ${port} is now teminated and ready to use.`));
           return resolve();
         }
 
