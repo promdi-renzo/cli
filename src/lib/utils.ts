@@ -14,7 +14,8 @@ export function errorMessage(diagnostic: ts.Diagnostic): string {
       fileName = `.${pathName[0]}`;
     }
 
-    return `Error : ${code} ${chalk.green(fileName)} (LINE=${chalk.yellow(line + 1)},CHAR=${chalk.yellow(character + 1)}): ${chalk.red(message)}`;
+    const codePath = `${fileName}:${line + 1}:${character + 1}`;
+    return `Error : ${code} ${chalk.green(codePath)} (LINE=${chalk.yellow(line + 1)},CHAR=${chalk.yellow(character + 1)}): ${chalk.red(message)}`;
   } else {
     return ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n");
   }
