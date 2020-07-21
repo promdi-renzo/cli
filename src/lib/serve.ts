@@ -43,15 +43,14 @@ function spawnCommand(port: number) {
 
 function taskKill(port: number) {
   return (data: any) => {
-    if (data.stdout) {
-      const portUsed = data.stdout
-        .replace(/\r?\n|\r/g, "")
-        .split(" ")
-        .filter(Boolean)
-        .slice(-1)[0];
-
-      console.log(chalk.yellow(`[mayajs] Port ${port} is already use.`));
-      return exec(`taskkill /PID ${portUsed} /F`);
+    if (data.stdout && data.stdout.includes("LISTENING")) {
+      const sanitizeStdout: string = data.stdout.replace(/\r?\n|\r|\s/g, "");
+      const matches: RegExpMatchArray = sanitizeStdout.match(/LISTENING(?<port>\d+?)TCP/) || [];
+      const groups = matches.groups || {};
+      const usedPort = groups.port || null;
+      if (usedPort) {
+        return exec(`taskkill /PID ${usedPort} /F`);
+      }
     }
   };
 }
@@ -60,7 +59,6 @@ async function killUsedPort(port: number, tries = 1): Promise<any> {
   return new Promise((resolve: any, reject: any) => {
     const portTerminated = (data: any) => {
       if (data.stdout.includes("SUCCESS")) {
-        console.log(chalk.yellow(`[mayajs] Port ${port} is now teminated and ready to use.`));
         return resolve();
       }
 
@@ -72,6 +70,10 @@ async function killUsedPort(port: number, tries = 1): Promise<any> {
 
       if (message.includes("netstat")) {
         return resolve();
+      }
+
+      if (message.includes("taskkill")) {
+        console.log(chalk.yellow(`[mayajs]`), chalk.red(`Port ${port} is still in use. This problem is cause by not properly terminating your application.`));
       }
 
       if (tries > 3) {
@@ -104,8 +106,6 @@ function restart(port: number, origPostProgramCreate: ((program: ts.SemanticDiag
     origPostProgramCreate!(program);
     if (!hasBuildError) {
       killUsedPort(port).finally(runProgram(port));
-    } else {
-      process.exit(0);
     }
   };
 }
