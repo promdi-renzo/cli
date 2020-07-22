@@ -16,6 +16,7 @@ import {
   createServiceTs,
   gitInit,
   installDependency,
+  createDatabase,
 } from "./create";
 import { serve } from "./serve";
 import { build, cleanOutDir } from "./build";
@@ -29,6 +30,7 @@ export const createProject = (directory: string) => {
     { title: taskTitle("create", `${directory}/src/app.module.ts`), task: createAppModule },
     { title: taskTitle("create", `${directory}/src/app.routing.module.ts`), task: createAppRoutingModule },
     { title: taskTitle("create", `${directory}/src/environment`), task: createEnvironment },
+    { title: taskTitle("create", `${directory}/src/databases`), task: createDatabase },
     { title: taskTitle("create", `${directory}/src/controller`), task: createController },
     { title: taskTitle("create", `${directory}/README.md`), task: createReadMe },
     { title: taskTitle("create", `${directory}/.gitignore`), task: createGitIgnore },
