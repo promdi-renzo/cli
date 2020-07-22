@@ -1,9 +1,9 @@
 ---
-name: "❌ Error report"
+name: "❌ Error"
 about: Report an error for compiling/run-time.
-title: ''
-labels: bug, help wanted
-assignees: Mackignacio
+title: '❌ Error: '
+labels: error, help wanted
+assignees: 'Mackignacio'
 
 ---
 
