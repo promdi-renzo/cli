@@ -1,11 +1,7 @@
 import { MongoSchema, MongoModel } from "@mayajs/mongo";
 
 const schema = MongoSchema({
-  name: {
-    required: [true, "Name is required."],
-    type: String,
-    unique: true,
-  },
+  // Add mongo fields here
 });
 
 export default MongoModel("#Name", schema);

@@ -90,6 +90,13 @@ export function createEnvironment(appName: any) {
   fs.writeFileSync(workingDirectory + "/index.ts", data);
 }
 
+export function createDatabase(appName: any) {
+  const workingDirectory = checkCurrentDirectory(appName + "/src/databases");
+  const CONTENTS = getContentsUTF8FromDirname("../files/mongo");
+  const UPDATED_MODEL_NAMES = CONTENTS.replace(/#model/g, "sample");
+  fs.writeFileSync(workingDirectory + "/mongo.ts", UPDATED_MODEL_NAMES);
+}
+
 export function createController(appName: any) {
   checkCurrentDirectory(appName + "/src/controllers");
   const workingDirectory = checkCurrentDirectory(appName + "/src/controllers/sample") + "/sample";
