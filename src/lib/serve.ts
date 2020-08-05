@@ -22,6 +22,7 @@ function reportDiagnostic(diagnostic: ts.Diagnostic) {
 }
 
 function reportWatchStatusChanged(diagnostic: ts.Diagnostic) {
+  // Display compilation errors
   console.log(chalk.green(`[mayajs] ${diagnostic.messageText}`));
 }
 
@@ -33,7 +34,7 @@ function spawnCommand(port: number) {
   });
 
   cmd.stderr.on("data", data => {
-    console.error(`stderr: ${data}`);
+    console.log(chalk.red(`[mayajs]`), `${data}`);
   });
 
   cmd.on("error", err => {
@@ -58,7 +59,7 @@ function taskKill(port: number) {
 async function killUsedPort(port: number, tries = 1): Promise<any> {
   return new Promise((resolve: any, reject: any) => {
     const portTerminated = (data: any) => {
-      if (data.stdout.includes("SUCCESS")) {
+      if (!data || data.stdout.includes("SUCCESS")) {
         return resolve();
       }
 
