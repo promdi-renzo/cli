@@ -50,6 +50,7 @@ export default function runCLI(npm: NpmPackage) {
     .command("serve")
     .alias("s")
     .option("-p, --port [port]", "Change port number")
+    .option("-p, --port=[port]", "Change port number")
     .description(
       `Run the server.
     ${chalk.green("maya serve")} | ${chalk.green("maya s")}
