@@ -1,11 +1,12 @@
-import { App } from "@mayajs/core";
-import Mongo from "./databases/mongo";
+import { Module } from "@mayajs/core";
+import { RouterModule } from "@mayajs/router";
 import { routes } from "./app.routing.module";
+import { AppController } from "./app.controller";
 
-@App({
-  cors: true,
-  logs: "dev",
-  databases: [Mongo], // Add databases here
-  routes
+@Module({
+  declarations: [AppController],
+  imports: [RouterModule.forRoot(routes)],
+  providers: [],
+  bootstrap: AppController,
 })
 export class AppModule {}
