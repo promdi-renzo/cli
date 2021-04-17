@@ -1,9 +1,5 @@
-import { SampleController } from "./controllers/sample/sample.controller";
-
 export const routes = [
-  {
-    controllers: [SampleController],
-    middlewares: [],
-    path: "",
-  },
+  // Add controllers routes here
+  // For more info on how to create controller routes
+  // See this link https://github.com/mayajs/router#controller
 ];

@@ -33,7 +33,7 @@ export default function runCLI(npm: NpmPackage) {
     .alias("g")
     .description(
       `Creates a new component.
- 
+
     ROUTE
     ${chalk.green("maya generate route sample")} | ${chalk.green("maya g r sample\n")}
     CONTROLLER
