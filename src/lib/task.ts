@@ -11,12 +11,11 @@ import {
   createEnvironment,
   createController,
   getCurrentDirectory,
-  createControllerTs,
   createModelTs,
   createServiceTs,
   gitInit,
   installDependency,
-  createDatabase,
+  createAppController,
 } from "./create";
 import { serve } from "./serve";
 import { build, cleanOutDir } from "./build";
@@ -30,8 +29,7 @@ export const createProject = (directory: string) => {
     { title: taskTitle("create", `${directory}/src/app.module.ts`), task: createAppModule },
     { title: taskTitle("create", `${directory}/src/app.routing.module.ts`), task: createAppRoutingModule },
     { title: taskTitle("create", `${directory}/src/environment`), task: createEnvironment },
-    { title: taskTitle("create", `${directory}/src/databases`), task: createDatabase },
-    { title: taskTitle("create", `${directory}/src/controller`), task: createController },
+    { title: taskTitle("create", `${directory}/src/controller`), task: createAppController },
     { title: taskTitle("create", `${directory}/README.md`), task: createReadMe },
     { title: taskTitle("create", `${directory}/.gitignore`), task: createGitIgnore },
     { title: taskTitle("create", `${directory}/package.json`), task: createPackageJSON },
@@ -58,13 +56,15 @@ export const createComponent = (component: string, directory: string) => {
   const workingDirectory = checkCurrentDirectory(currentDirectory) + filename;
   const tasks = chooseComponent(component, directory, name);
 
-  tasks.run({ directory: workingDirectory, name }).catch((err: any) => {
-    console.error(err);
-  });
+  if (tasks) {
+    tasks.run({ directory: workingDirectory, name }).catch((err: any) => {
+      console.error(err);
+    });
+  }
 };
 
-function chooseComponent(component: string, directory: string, name: string): Listr<any> {
-  let tasks = new Listr([]);
+function chooseComponent(component: string, directory: string, name: string): Listr<any> | null {
+  let tasks: Listr | null = null;
 
   if (component === "r" || component === "route") {
     tasks = createRoutesTaskList(directory, name);
@@ -88,14 +88,14 @@ function chooseComponent(component: string, directory: string, name: string): Li
 function createRoutesTaskList(directory: string, name: string) {
   const workingDirectory = `src/${directory}/${name}`;
   return new Listr([
-    { title: taskTitle("create", `${workingDirectory}.controller.ts`), task: createControllerTs },
+    { title: taskTitle("create", `${workingDirectory}.controller.ts`), task: createController },
     { title: taskTitle("create", `${workingDirectory}.model.ts`), task: createModelTs },
     { title: taskTitle("create", `${workingDirectory}.service.ts`), task: createServiceTs },
   ]);
 }
 
 function createControllerTaskList(directory: string, name: string) {
-  return new Listr([{ title: taskTitle("create", `src/${directory}/${name}.controller.ts`), task: createControllerTs }]);
+  return new Listr([{ title: taskTitle("create", `src/${directory}/${name}.controller.ts`), task: createController }]);
 }
 
 function createServicesTaskList(directory: string, name: string) {

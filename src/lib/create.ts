@@ -97,29 +97,31 @@ export function createDatabase(appName: any) {
   fs.writeFileSync(workingDirectory + "/mongo.ts", UPDATED_MODEL_NAMES);
 }
 
-export function createController(appName: any) {
+export function createAppController(appName: string) {
+  const directory = checkCurrentDirectory(appName + "/src") + "/app";
+  createController({ directory, name: "app", start: true });
+}
+
+export function createRoute(appName: any) {
   checkCurrentDirectory(appName + "/src/controllers");
   const workingDirectory = checkCurrentDirectory(appName + "/src/controllers/sample") + "/sample";
-  createControllerTs({ directory: workingDirectory, name: "sample", start: true });
+  createController({ directory: workingDirectory, name: "sample", start: true });
   createModelTs({ directory: workingDirectory, name: "sample" });
   createServiceTs({ directory: workingDirectory, name: "sample", start: true });
 }
 
-export function createControllerTs(object: { directory: string; name: string; start?: boolean }) {
+export function createController(object: { directory: string; name: string; start?: boolean }) {
   const { directory, name, start } = object;
+  const isApp = name === "app";
   const CONTENTS = getContentsUTF8FromDirname("../files/controller");
   const services = upperCaseWordWithDashes(name) + "Services";
   const updatedConstructor = CONTENTS.replace(/#constructor/g, start ? `private services: ${services}` : "");
-  const methodData = [
-    '\n  @Get({ path: "/", middlewares: [] })\n',
-    "  root(req: Request, res: Response, next: NextFunction): void {\n  ",
-    "  res.send(this.services.hello());\n  }",
-  ].join("");
-  const updatedMethod = updatedConstructor.replace(/#method/g, start ? methodData : "");
+  const body = isApp ? CONTENTS.replace(/constructor\(#constructor\) {}/g, "") : updatedConstructor;
+  const methodData = ['@Get({ path: "/" })\n', "  hello() {\n  ", '  return "Hello World!";\n  }'].join("");
+  const updatedMethod = body.replace(/#method/g, start ? methodData : "");
   const updatedServices = start ? updateServicesImport(updatedMethod, name) : updatedMethod.replace(/#services/g, "");
   const updatedController = updateControllersName(updatedServices, name);
-  const updatedModel = updateModelsName(updatedController, name);
-  const DATA = updateNames(updatedModel, name);
+  const DATA = updateNames(updatedController, name);
   fs.writeFileSync(path.resolve(`${directory}.controller.ts`), DATA);
 }
 
@@ -148,8 +150,13 @@ function upperCaseWordWithDashes(word: string) {
 }
 
 function updateServicesImport(word: string, name: string) {
-  const services = upperCaseWordWithDashes(name) + "Services";
-  const importStatement = `import { ${services} } from "./${name}.service"\n`;
+  let importStatement = "";
+
+  if (name !== "app") {
+    const services = upperCaseWordWithDashes(name) + "Services";
+    importStatement = `import { ${services} } from "./${name}.service"\n`;
+  }
+
   return word.replace(/#services/g, importStatement);
 }
 
@@ -161,10 +168,6 @@ function updateServicesName(word: string, name: string) {
 function updateControllersName(word: string, name: string) {
   const controller = upperCaseWordWithDashes(name) + "Controller";
   return word.replace(/#controller/g, controller);
-}
-
-function updateModelsName(word: string, name: string) {
-  return word.replace(/#model/g, name + ".model");
 }
 
 function updateNames(word: string, name: string) {
