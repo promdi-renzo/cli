@@ -43,7 +43,7 @@ export const createProject = (directory: string) => {
   });
 };
 
-export const createComponent = (component: string, directory: string) => {
+export const createComponent = (component: string, directory: string, options: any) => {
   const dir_array = directory.split(/\\|\//);
   const name = dir_array[dir_array.length - 1];
   const dir = dir_array.reduce((acc: string, cur: string, index: number) => {
@@ -57,7 +57,7 @@ export const createComponent = (component: string, directory: string) => {
   const tasks = chooseComponent(component, directory, name);
 
   if (tasks) {
-    tasks.run({ directory: workingDirectory, name }).catch((err: any) => {
+    tasks.run({ directory: workingDirectory, name, schema: options.schema }).catch((err: any) => {
       console.error(err);
     });
   }
@@ -89,7 +89,6 @@ function createRoutesTaskList(directory: string, name: string) {
   const workingDirectory = `src/${directory}/${name}`;
   return new Listr([
     { title: taskTitle("create", `${workingDirectory}.controller.ts`), task: createController },
-    { title: taskTitle("create", `${workingDirectory}.model.ts`), task: createModelTs },
     { title: taskTitle("create", `${workingDirectory}.service.ts`), task: createServiceTs },
   ]);
 }
@@ -103,7 +102,7 @@ function createServicesTaskList(directory: string, name: string) {
 }
 
 function createModelTask(directory: string, name: string) {
-  return new Listr([{ title: taskTitle("create", `src/${directory}/${name}.service.ts`), task: createModelTs }]);
+  return new Listr([{ title: taskTitle("create", `src/${directory}/${name}.model.ts`), task: createModelTs }]);
 }
 
 function taskTitle(type: string, value: string) {
