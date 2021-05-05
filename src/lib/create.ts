@@ -102,14 +102,6 @@ export function createAppController(appName: string) {
   createController({ directory, name: "app", start: true });
 }
 
-export function createRoute(appName: any) {
-  checkCurrentDirectory(appName + "/src/controllers");
-  const workingDirectory = checkCurrentDirectory(appName + "/src/controllers/sample") + "/sample";
-  createController({ directory: workingDirectory, name: "sample", start: true });
-  createModelTs({ directory: workingDirectory, name: "sample" });
-  createServiceTs({ directory: workingDirectory, name: "sample", start: true });
-}
-
 export function createController(object: { directory: string; name: string; start?: boolean }) {
   const { directory, name, start } = object;
   const isApp = name === "app";
