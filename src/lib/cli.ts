@@ -31,6 +31,8 @@ export default function runCLI(npm: NpmPackage) {
   program
     .command("generate <component> <directory>")
     .alias("g")
+    .option("-s, --schema [schema]", "Specify schema model")
+    .option("-s, --schema=[schema]", "Specify schema model")
     .description(
       `Creates a new component.
 
