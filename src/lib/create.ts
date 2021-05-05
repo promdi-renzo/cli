@@ -125,9 +125,19 @@ export function createController(object: { directory: string; name: string; star
   fs.writeFileSync(path.resolve(`${directory}.controller.ts`), DATA);
 }
 
-export function createModelTs(object: { directory: string; name: string }) {
-  const { directory, name } = object;
-  const CONTENTS = getContentsUTF8FromDirname("../files/model");
+export function createModelTs(object: { directory: string; name: string; schema: string }) {
+  const { directory, name, schema } = object;
+  const schemas = ["mongo", "sql"];
+
+  if (!schema) {
+    throw new Error(`Schema is not defined!`);
+  }
+
+  if (!schemas.includes(schema)) {
+    throw new Error(`Schema type of ${schema} is not valid!`);
+  }
+
+  const CONTENTS = getContentsUTF8FromDirname(`../files/model-${schema}`);
   const DATA = updateNames(CONTENTS, name);
   fs.writeFileSync(path.resolve(`${directory}.model.ts`), DATA);
 }
