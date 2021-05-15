@@ -108,10 +108,8 @@ export function createController(object: { directory: string; name: string; star
   const CONTENTS = getContentsUTF8FromDirname("../files/controller");
   const services = upperCaseWordWithDashes(name) + "Services";
   const updatedConstructor = CONTENTS.replace(/#constructor/g, start ? `private services: ${services}` : "");
-  const body = isApp ? CONTENTS.replace(/constructor\(#constructor\) {}/g, "") : updatedConstructor;
-  const methodData = ['@Get({ path: "/" })\n', "  hello() {\n  ", '  return "Hello World!";\n  }'].join("");
-  const updatedMethod = body.replace(/#method/g, start ? methodData : "");
-  const updatedServices = start ? updateServicesImport(updatedMethod, name) : updatedMethod.replace(/#services/g, "");
+  const body = isApp ? CONTENTS.replace(/[\n|\r]\s+?constructor\(#constructor\) {}[\n|\r]{2,}/g, "\n") : updatedConstructor;
+  const updatedServices = start ? updateServicesImport(body, name) : body.replace(/#services/g, "");
   const updatedController = updateControllersName(updatedServices, name);
   const DATA = updateNames(updatedController, name);
   fs.writeFileSync(path.resolve(`${directory}.controller.ts`), DATA);
