@@ -12,8 +12,8 @@
   ],
   "dependencies": {
     "@mayajs/common": "^0.5.0",
-    "@mayajs/core": "^0.5.2",
-    "@mayajs/router": "^0.5.0"
+    "@mayajs/core": "^0.5.3",
+    "@mayajs/router": "^0.5.3"
   },
   "devDependencies": {
     "@mayajs/cli": "^0.5.2",
