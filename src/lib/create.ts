@@ -107,11 +107,9 @@ export function createController(object: { directory: string; name: string; star
   const isApp = name === "app";
   const CONTENTS = getContentsUTF8FromDirname("../files/controller");
   const services = upperCaseWordWithDashes(name) + "Services";
-  const updatedConstructor = CONTENTS.replace(/#constructor/g, start ? `private services: ${services}` : "");
-  const body = isApp ? CONTENTS.replace(/constructor\(#constructor\) {}/g, "") : updatedConstructor;
-  const methodData = ['@Get({ path: "/" })\n', "  hello() {\n  ", '  return "Hello World!";\n  }'].join("");
-  const updatedMethod = body.replace(/#method/g, start ? methodData : "");
-  const updatedServices = start ? updateServicesImport(updatedMethod, name) : updatedMethod.replace(/#services/g, "");
+  const updatedConstructor = CONTENTS.replace(/#constructor/g, !start ? `private services: ${services}` : "");
+  const body = isApp ? CONTENTS.replace(/[\n|\r]\s+?constructor\(#constructor\) {}[\n|\r]{2,}/g, "\n") : updatedConstructor;
+  const updatedServices = !start ? updateServicesImport(body, name) : body.replace(/#services/g, "");
   const updatedController = updateControllersName(updatedServices, name);
   const DATA = updateNames(updatedController, name);
   fs.writeFileSync(path.resolve(`${directory}.controller.ts`), DATA);
@@ -137,9 +135,7 @@ export function createModelTs(object: { directory: string; name: string; schema:
 export function createServiceTs(object: { directory: string; name: string; start?: boolean }) {
   const { directory, name, start = false } = object;
   const CONTENTS = getContentsUTF8FromDirname("../files/service");
-  const methodData = ["\n  hello() {\n  ", '  return "Hello world!";\n  ', "}\n"].join("");
-  const updatedMethod = CONTENTS.replace(/#method/g, start ? methodData : "");
-  const updatedSerices = updateServicesName(updatedMethod, name);
+  const updatedSerices = updateServicesName(CONTENTS, name);
   const DATA = updateNames(updatedSerices, name);
   fs.writeFileSync(path.resolve(`${directory}.service.ts`), DATA);
 }
