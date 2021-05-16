@@ -107,9 +107,9 @@ export function createController(object: { directory: string; name: string; star
   const isApp = name === "app";
   const CONTENTS = getContentsUTF8FromDirname("../files/controller");
   const services = upperCaseWordWithDashes(name) + "Services";
-  const updatedConstructor = CONTENTS.replace(/#constructor/g, start ? `private services: ${services}` : "");
+  const updatedConstructor = CONTENTS.replace(/#constructor/g, !start ? `private services: ${services}` : "");
   const body = isApp ? CONTENTS.replace(/[\n|\r]\s+?constructor\(#constructor\) {}[\n|\r]{2,}/g, "\n") : updatedConstructor;
-  const updatedServices = start ? updateServicesImport(body, name) : body.replace(/#services/g, "");
+  const updatedServices = !start ? updateServicesImport(body, name) : body.replace(/#services/g, "");
   const updatedController = updateControllersName(updatedServices, name);
   const DATA = updateNames(updatedController, name);
   fs.writeFileSync(path.resolve(`${directory}.controller.ts`), DATA);
