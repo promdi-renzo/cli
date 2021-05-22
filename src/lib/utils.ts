@@ -1,6 +1,7 @@
 import path from "path";
 import chalk from "chalk";
 import ts from "typescript";
+import * as fs from "fs";
 
 export function errorMessage(diagnostic: ts.Diagnostic): string {
   if (diagnostic.file) {
@@ -19,4 +20,9 @@ export function errorMessage(diagnostic: ts.Diagnostic): string {
   } else {
     return ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n");
   }
+}
+
+export function getContentsUTF8FromDirname(relativePath: string) {
+  const FILE_PATH = path.resolve(__dirname, relativePath);
+  return fs.readFileSync(FILE_PATH, "utf8");
 }
