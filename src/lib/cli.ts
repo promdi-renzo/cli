@@ -21,9 +21,15 @@ export default function runCLI(npm: NpmPackage) {
   program
     .command("new <directory>")
     .alias("n")
+    .option("-t, --template [template]", "Specify project template")
+    .option("-t, --template=[template]", "Specify project template")
     .description(
-      `Creates a new MayaJS project.
+      `
+    Creates a new MayaJS project.
     ${chalk.green("maya new my-new-app")} | ${chalk.green("maya n my-new-app")}
+
+    With template
+    ${chalk.green("maya n my-new-app template=todo")}
     `
     )
     .action(createProject);
@@ -34,7 +40,8 @@ export default function runCLI(npm: NpmPackage) {
     .option("-s, --schema [schema]", "Specify schema model")
     .option("-s, --schema=[schema]", "Specify schema model")
     .description(
-      `Creates a new component.
+      `
+    Creates a new component.
 
     ROUTE
     ${chalk.green("maya generate route sample")} | ${chalk.green("maya g r sample\n")}
@@ -42,8 +49,10 @@ export default function runCLI(npm: NpmPackage) {
     ${chalk.green("maya generate controller sample")} | ${chalk.green("maya g c sample\n")}
     SERVICE
     ${chalk.green("maya generate service sample")} | ${chalk.green("maya g s sample\n")}
-    MODEL
-    ${chalk.green("maya generate model sample")} | ${chalk.green("maya g m sample")}
+    MODEL MONGO SCHEMA
+    ${chalk.green("maya generate model sample schema=mongo")} | ${chalk.green("maya g m sample schema=mongo\n")}
+    MODEL SQL SCHEMA
+    ${chalk.green("maya generate model sample schema=sql")} | ${chalk.green("maya g m sample schema=sql")}
     `
     )
     .action(createComponent);
@@ -54,7 +63,8 @@ export default function runCLI(npm: NpmPackage) {
     .option("-p, --port [port]", "Change port number")
     .option("-p, --port=[port]", "Change port number")
     .description(
-      `Run the server.
+      `
+    Run the server.
     ${chalk.green("maya serve")} | ${chalk.green("maya s")}
 
     OPTIONS:
