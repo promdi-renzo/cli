@@ -38,7 +38,6 @@
     "commander": "^3.0.0",
     "figlet": "^1.2.4",
     "listr": "^0.14.3",
-    "shx": "^0.3.2",
     "typescript": "^3.9.7",
     "shelljs": "^0.8.4"
   },
@@ -47,12 +46,8 @@
     "@types/commander": "^2.12.2",
     "@types/figlet": "^1.2.0",
     "@types/listr": "^0.14.2",
-    "@types/node": "^12.12.14",
+    "@types/node": "^12.20.13",
     "@types/shelljs": "^0.8.8",
-    "@typescript-eslint/eslint-plugin": "^2.4.0",
-    "@typescript-eslint/parser": "^2.4.0",
-    "eslint": "^6.5.1",
-    "prettier": "^1.18.2",
     "ts-node": "^8.5.4",
     "wait-on": "^3.3.0"
   }
