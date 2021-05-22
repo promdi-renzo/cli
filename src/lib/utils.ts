@@ -26,3 +26,10 @@ export function getContentsUTF8FromDirname(relativePath: string) {
   const FILE_PATH = path.resolve(__dirname, relativePath);
   return fs.readFileSync(FILE_PATH, "utf8");
 }
+
+export function upperCaseWordWithDashes(word: string) {
+  const firstLetter = word.replace(/^\w/, (c) => c.toUpperCase());
+  const dashedLetter = firstLetter.replace(/-\w/g, (c) => c.toUpperCase());
+  const noDashes = dashedLetter.replace(/-/g, "");
+  return noDashes;
+}
