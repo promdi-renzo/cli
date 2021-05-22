@@ -1,46 +1,51 @@
 import Listr from "listr";
-import {
-  createIndex,
-  createReadMe,
-  checkCurrentDirectory,
-  createPackageJSON,
-  createGitIgnore,
-  createTsConfig,
-  createAppModule,
-  createAppRoutingModule,
-  createEnvironment,
-  createController,
-  getCurrentDirectory,
-  createModelTs,
-  createServiceTs,
-  gitInit,
-  installDependency,
-  createAppController,
-} from "./create";
+import { checkCurrentDirectory, createController, getCurrentDirectory, createModelTs, createServiceTs } from "./create";
 import { serve } from "./serve";
 import { build, cleanOutDir } from "./build";
 import chalk from "chalk";
+import path from "path";
+import * as shell from "shelljs";
+import fs from "fs";
+import { getContentsUTF8FromDirname, upperCaseWordWithDashes } from "./utils";
 
-export const createProject = (directory: string) => {
-  checkCurrentDirectory(directory);
+export const createProject = (directory: string, options: any) => {
+  const templateDir = path.resolve(`${__dirname}`, "../templates");
+  const defaultTemplate = `${templateDir}/default`;
+  const isTemplateExist = fs.existsSync(templateDir);
+  const isDefaultExist = fs.existsSync(defaultTemplate);
 
-  const tasks = new Listr([
-    { title: taskTitle("create", `${directory}/src/index.ts`), task: createIndex },
-    { title: taskTitle("create", `${directory}/src/app.module.ts`), task: createAppModule },
-    { title: taskTitle("create", `${directory}/src/app.routing.module.ts`), task: createAppRoutingModule },
-    { title: taskTitle("create", `${directory}/src/environment`), task: createEnvironment },
-    { title: taskTitle("create", `${directory}/src/controller`), task: createAppController },
-    { title: taskTitle("create", `${directory}/README.md`), task: createReadMe },
-    { title: taskTitle("create", `${directory}/.gitignore`), task: createGitIgnore },
-    { title: taskTitle("create", `${directory}/package.json`), task: createPackageJSON },
-    { title: taskTitle("create", `${directory}/tsconfig.json`), task: createTsConfig },
-    { title: taskTitle("execute", "Initialize git repository"), task: gitInit },
-    { title: taskTitle("execute", "Install project dependencies"), task: installDependency },
-  ]);
+  if (!isTemplateExist || !isDefaultExist) {
+    shell.rm("-rf", templateDir);
+    shell.echo(chalk.yellow(`[mayajs] Downloading files for creating your MayaJS project...`));
+    shell.exec(`git clone https://github.com/mayajs/templates.git ${templateDir}`, { silent: true });
+    shell.rm("-rf", [`${templateDir}/.git`, `${templateDir}/README.md`]);
+    shell.echo(chalk.green(`[mayajs] Download completed!`));
+  }
 
-  tasks.run(directory).catch((err: any) => {
-    console.error(err);
-  });
+  const projectDir = path.resolve(process.cwd(), directory);
+  const projectExist = fs.existsSync(projectDir);
+
+  if (projectExist) shell.rm("-rf", projectDir);
+
+  shell.echo(chalk.yellow(`[mayajs] Preparing project files and directories...`));
+  shell.cp("-Rf", defaultTemplate, projectDir);
+  shell.echo(chalk.green(`[mayajs] Preparation completed!`));
+
+  const projectname = upperCaseWordWithDashes(directory);
+  const readme = `${projectDir}/README.md`;
+  const packageJson = `${projectDir}/package.json`;
+
+  shell.sed("-i", /([\s|\"])(MayaJS)/g, "$1" + projectname + " $2", [readme, packageJson]);
+  const PACKAGE_DATA = getContentsUTF8FromDirname("../package.json");
+  const PACKAGE_DATA_JSON = JSON.parse(PACKAGE_DATA);
+  shell.sed("-i", /(version)/g, "$1 " + PACKAGE_DATA_JSON.version, readme);
+  shell.sed("-i", /\"mayajs\"/, `"${directory.toLowerCase()}"`, packageJson);
+  shell.cd(projectDir);
+  shell.echo(chalk.yellow(`[mayajs] Installing project dependencies...\n`));
+  shell.exec("npm i");
+  shell.echo(chalk.green(`[mayajs] Installation completed!`));
+  shell.echo(chalk.yellow(`[mayajs] Running your project for the first time...`));
+  runServer({ port: 3333 });
 };
 
 export const createComponent = (component: string, directory: string, options: any) => {
@@ -119,7 +124,7 @@ function taskTitle(type: string, value: string) {
   return title;
 }
 
-export async function runServer(cmd: any, options: any) {
+export async function runServer(cmd: any) {
   try {
     cleanOutDir({ outDir: process.cwd() + "/dist" });
     serve(cmd.port ? cmd.port : 3333);
@@ -143,7 +148,10 @@ export function buildProject() {
     esModuleInterop: true,
   };
 
-  tasks = new Listr([{ title: taskTitle("execute", `Clean dist folder`), task: cleanOutDir }, { title: taskTitle("execute", `Build project`), task: build }]);
+  tasks = new Listr([
+    { title: taskTitle("execute", `Clean dist folder`), task: cleanOutDir },
+    { title: taskTitle("execute", `Build project`), task: build },
+  ]);
 
   tasks.run(options).catch((err: any) => {
     console.error(err);
