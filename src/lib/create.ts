@@ -1,6 +1,7 @@
 import * as path from "path";
 import * as shell from "shelljs";
 import * as fs from "fs";
+import { getContentsUTF8FromDirname, upperCaseWordWithDashes } from "./utils";
 
 export function checkCurrentDirectory(name: string) {
   const curDir = getCurrentDirectory(name);
@@ -140,13 +141,6 @@ export function createServiceTs(object: { directory: string; name: string; start
   fs.writeFileSync(path.resolve(`${directory}.service.ts`), DATA);
 }
 
-function upperCaseWordWithDashes(word: string) {
-  const firstLetter = word.replace(/^\w/, c => c.toUpperCase());
-  const dashedLetter = firstLetter.replace(/-\w/g, c => c.toUpperCase());
-  const noDashes = dashedLetter.replace(/-/g, "");
-  return noDashes;
-}
-
 function updateServicesImport(word: string, name: string) {
   let importStatement = "";
 
@@ -170,9 +164,4 @@ function updateControllersName(word: string, name: string) {
 
 function updateNames(word: string, name: string) {
   return word.replace(/#name/g, name).replace(/#Name/g, upperCaseWordWithDashes(name));
-}
-
-function getContentsUTF8FromDirname(relativePath: string) {
-  const FILE_PATH = path.resolve(__dirname, relativePath);
-  return fs.readFileSync(FILE_PATH, "utf8");
 }
