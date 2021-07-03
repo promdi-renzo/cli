@@ -146,7 +146,7 @@ export const createComponent = async (component: string, directory: string, opti
   const filename = isRoute ? `/${name}` : `/${directory}`;
   const workingDirectory = checkCurrentDirectory(currentDirectory) + filename;
 
-  tasks.run({ directory: workingDirectory, name, ...options }).catch((err: any) => {
+  tasks.run({ directory: workingDirectory, name, noImports: !isRoute, ...options }).catch((err: any) => {
     console.error(err);
   });
 };
