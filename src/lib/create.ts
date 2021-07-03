@@ -100,17 +100,17 @@ export function createDatabase(appName: any) {
 
 export function createAppController(appName: string) {
   const directory = checkCurrentDirectory(appName + "/src") + "/app";
-  createController({ directory, name: "app", start: true });
+  createController({ directory, name: "app" });
 }
 
-export async function createController(object: { directory: string; name: string; start?: boolean }) {
-  const { directory, name, start } = object;
+export async function createController(object: { directory: string; name: string; noImports?: boolean }) {
+  const { directory, name, noImports = false } = object;
   const isApp = name === "app";
   const CONTENTS = getContentsUTF8FromDirname("../files/controller");
   const services = upperCaseWordWithDashes(name) + "Services";
-  const updatedConstructor = CONTENTS.replace(/#constructor/g, !start ? `private services: ${services}` : "");
-  const body = isApp ? CONTENTS.replace(/[\n|\r]\s+?constructor\(#constructor\) {}[\n|\r]{2,}/g, "\n") : updatedConstructor;
-  const updatedServices = !start ? updateServicesImport(body, name) : body.replace(/#services/g, "");
+  const updatedConstructor = CONTENTS.replace(/#constructor/g, `private services: ${services}`);
+  const body = noImports || isApp ? CONTENTS.replace(/[\n|\r]\s+?constructor\(#constructor\) {}[\n|\r]{2,}/g, "\n") : updatedConstructor;
+  const updatedServices = !noImports ? updateServicesImport(body, name) : body.replace(/#services/g, "");
   const updatedController = updateControllersName(updatedServices, name);
   const DATA = updateNames(updatedController, name);
   fs.writeFileSync(path.resolve(`${directory}.controller.ts`), DATA);
@@ -118,14 +118,13 @@ export async function createController(object: { directory: string; name: string
 
 export async function createModelTs(object: { directory: string; name: string; schema: string }) {
   const { directory, name, schema } = object;
-
   const CONTENTS = getContentsUTF8FromDirname(`../files/model-${schema}`);
   const DATA = updateNames(CONTENTS, name);
   fs.writeFileSync(path.resolve(`${directory}.model.ts`), DATA);
 }
 
 export async function createServiceTs(object: { directory: string; name: string; start?: boolean }) {
-  const { directory, name, start = false } = object;
+  const { directory, name } = object;
   const CONTENTS = getContentsUTF8FromDirname("../files/service");
   const updatedSerices = updateServicesName(CONTENTS, name);
   const DATA = updateNames(updatedSerices, name);
