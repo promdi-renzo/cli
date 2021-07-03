@@ -8,6 +8,7 @@ import * as shell from "shelljs";
 import fs from "fs";
 import { getContentsUTF8FromDirname, upperCaseWordWithDashes } from "./utils";
 import https from "https";
+import inquirer from "inquirer";
 
 export const createProject = async (directory: string, options: any) => {
   const templatesFolderDir = path.resolve(`${__dirname}`, "../templates");
@@ -114,9 +115,28 @@ export const createProject = async (directory: string, options: any) => {
   runServer({ port: 3333 });
 };
 
-export const createComponent = (component: string, directory: string, options: any) => {
+export const createComponent = async (component: string, directory: string, options: any) => {
+  const args = { r: "route", c: "controller", s: "service", m: "model" };
+  let selectedArgs = args[component.charAt(0)];
+
+  if (!selectedArgs) {
+    const componentList = ["route", "controller", "service", "model"];
+    const question = { type: "list", name: "arg", message: "Choose a component to generate", choices: componentList, default: componentList[0] };
+    const answer = await inquirer.prompt([question]);
+    component = selectedArgs = answer.arg;
+  }
+
+  const choices = ["mongo", "sql"];
   const dir_array = directory.split(/\\|\//);
   const name = dir_array[dir_array.length - 1];
+  const taskList = chooseComponentTask(selectedArgs, directory, name);
+  const tasks: Listr = new Listr(taskList);
+
+  if (selectedArgs === "model" && (!options?.schema || !choices.includes(options?.schema))) {
+    const question = { type: "list", name: "schema", message: "Choose a schema", choices, default: choices[0] };
+    options = await inquirer.prompt([question]);
+  }
+
   const dir = dir_array.reduce((acc: string, cur: string, index: number) => {
     checkCurrentDirectory(acc);
     return `${acc}/${cur}`;
@@ -125,69 +145,24 @@ export const createComponent = (component: string, directory: string, options: a
   const currentDirectory = isRoute ? dir : "src";
   const filename = isRoute ? `/${name}` : `/${directory}`;
   const workingDirectory = checkCurrentDirectory(currentDirectory) + filename;
-  const tasks = chooseComponent(component, directory, name);
 
-  if (tasks) {
-    tasks.run({ directory: workingDirectory, name, schema: options.schema }).catch((err: any) => {
-      console.error(err);
-    });
-  }
+  tasks.run({ directory: workingDirectory, name, ...options }).catch((err: any) => {
+    console.error(err);
+  });
 };
 
-function chooseComponent(component: string, directory: string, name: string): Listr<any> | null {
-  let tasks: Listr | null = null;
-
-  if (component === "r" || component === "route") {
-    tasks = createRoutesTaskList(directory, name);
-  }
-
-  if (component === "c" || component === "controller") {
-    tasks = createControllerTaskList(directory, name);
-  }
-
-  if (component === "s" || component === "services") {
-    tasks = createServicesTaskList(directory, name);
-  }
-
-  if (component === "m" || component === "model") {
-    tasks = createModelTask(directory, name);
-  }
-
-  return tasks;
-}
-
-function createRoutesTaskList(directory: string, name: string) {
-  const workingDirectory = `src/${directory}/${name}`;
-  return new Listr([
-    { title: taskTitle("create", `${workingDirectory}.controller.ts`), task: createController },
-    { title: taskTitle("create", `${workingDirectory}.service.ts`), task: createServiceTs },
-  ]);
-}
-
-function createControllerTaskList(directory: string, name: string) {
-  return new Listr([{ title: taskTitle("create", `src/${directory}/${name}.controller.ts`), task: createController }]);
-}
-
-function createServicesTaskList(directory: string, name: string) {
-  return new Listr([{ title: taskTitle("create", `src/${directory}/${name}.service.ts`), task: createServiceTs }]);
-}
-
-function createModelTask(directory: string, name: string) {
-  return new Listr([{ title: taskTitle("create", `src/${directory}/${name}.model.ts`), task: createModelTs }]);
+function chooseComponentTask(arg: string, directory: string, name: string) {
+  const task = { controller: createController, service: createServiceTs, model: createModelTs };
+  const create = (arr: string[]) => arr.map((e) => ({ title: taskTitle("create", `src/${directory}/${name}.${e}.ts`), task: task[e] }));
+  return arg === "route" ? create(["controller", "service"]) : create([arg]);
 }
 
 function taskTitle(type: string, value: string) {
-  let title = "";
-
-  if (type === "create") {
-    title = `${chalk.green("create")} ${getCurrentDirectory(value)}`.replace(process.cwd(), "");
-  }
-
-  if (type === "execute") {
-    title = chalk.yellow(value);
-  }
-
-  return title;
+  const title = {
+    create: `${chalk.green("create")} ${getCurrentDirectory(value)}`.replace(process.cwd(), ""),
+    execute: chalk.yellow(value),
+  };
+  return title[type];
 }
 
 export async function runServer(cmd: any) {
