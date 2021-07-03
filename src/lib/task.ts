@@ -131,7 +131,7 @@ export const createProject = async (directory: string, options: any) => {
       shell.sed("-i", /(version)/g, "$1 " + PROJECT_DATA_JSON.version, readme);
       shell.sed("-i", /\"mayajs\"/, `"${directory.toLowerCase()}"`, packageJson);
       shell.cd(projectDir);
-      shell.exec("npm i");
+      shell.exec("npm i --error");
     },
   });
 
