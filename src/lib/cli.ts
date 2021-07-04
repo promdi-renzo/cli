@@ -24,8 +24,10 @@ export default function runCLI(npm: NpmPackage) {
     Creates a new MayaJS project.
     ${chalk.green("maya new my-new-app")} | ${chalk.green("maya n my-new-app")}
 
-    With template
-    ${chalk.green("maya n my-new-app template=todo")}
+    OPTIONS:
+      -t,--template   Set project template
+
+    ${chalk.green("maya n my-new-app --template=todo")} |  ${chalk.green("maya n my-new-app -t=todo")}
     `
     )
     .action(createProject);
@@ -55,10 +57,10 @@ export default function runCLI(npm: NpmPackage) {
       -s,--schema   Set model schema
 
       For MongoDB
-      ${chalk.green("maya g m sample --schema=mongo")}
+      ${chalk.green("maya g m sample --schema=mongo")} | ${chalk.green("maya g m sample -s=mongo")}
 
       For SQL Databases
-      ${chalk.green("maya g m sample --schema=sql")}
+      ${chalk.green("maya g m sample --schema=sql")} | ${chalk.green("maya g m sample -s=sql")}
     `
     )
     .action(createComponent);
