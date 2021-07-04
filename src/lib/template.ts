@@ -111,6 +111,6 @@ const templatesFolderDir = path.resolve(`${__dirname}`, "../templates");
 const commonDir = `${templatesFolderDir}/common`;
 const templateDir = `${templatesFolderDir}/default`;
 const templateExist = () => !fs.existsSync(templatesFolderDir) || !fs.existsSync(templateDir);
-const commonExist = () => () => !fs.existsSync(commonDir);
+const commonExist = () => !fs.existsSync(commonDir);
 
 export { templateDir, templatesFolderDir, templateTasks };
