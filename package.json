@@ -1,6 +1,6 @@
 {
   "name": "@mayajs/cli",
-  "version": "0.5.3",
+  "version": "0.5.4",
   "description": "MayaJS CLI is a command line interface for MayaJS. Its primary purpose is to assist developers with building MayaJS projects. MayaJS CLI allows you to generate and serving MayaJS project as well as generate MayaJS files (e.g. controllers, services and models).",
   "main": "index.js",
   "files": [
