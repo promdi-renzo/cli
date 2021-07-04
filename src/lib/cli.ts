@@ -3,7 +3,7 @@ import figlet from "figlet";
 import chalk from "chalk";
 
 // TASKS
-import { createProject, createComponent, runServer, buildProject, chooseAction, createCommand, runCommand } from "./task";
+import { createProject, createComponent, runServer, buildProject, chooseAction, createCommand, runCommand, generateCommand } from "./task";
 
 // INTERFACE
 interface NpmPackage {
@@ -102,7 +102,7 @@ export default function runCLI(npm: NpmPackage) {
           help: program.outputHelp,
           create: createCommand,
           build: buildProject,
-          generate: () => {},
+          generate: generateCommand,
           run: runCommand,
         };
         commands[options.action]();
