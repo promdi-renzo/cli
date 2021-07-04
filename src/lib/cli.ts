@@ -3,7 +3,7 @@ import figlet from "figlet";
 import chalk from "chalk";
 
 // TASKS
-import { createProject, createComponent, runServer, buildProject } from "./task";
+import { createProject, createComponent, runServer, buildProject, chooseAction } from "./task";
 
 // INTERFACE
 interface NpmPackage {
@@ -96,6 +96,13 @@ export default function runCLI(npm: NpmPackage) {
 
   if (process.argv.length === 2) {
     console.log(chalk.red(figlet.textSync("MayaJS", { horizontalLayout: "full" })));
-    program.outputHelp();
+    chooseAction()
+      .then((options) => {
+        const commands = {
+          help: () => program.outputHelp(),
+        };
+        commands[options.action]();
+      })
+      .catch((error) => console.log(error));
   }
 }
