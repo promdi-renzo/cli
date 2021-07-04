@@ -38,4 +38,29 @@ const updateTemplateList = async (ctx: any, task: any) => {
   ctx["promise"] = promise;
 };
 
-export { updateTemplateFolder, cloneTemplateRepo, updateTemplateList };
+const searchTemplates = async (ctx: any, task: any) => {
+  let selectedVersion = { version: "", url: "" };
+  const DATA_JSON = JSON.parse(ctx.DATA_JSON);
+  Object.keys(DATA_JSON).some((key) => {
+    if (key === ctx?.template) {
+      const versions: { version: string; cli: string; url: string }[] = DATA_JSON[key].versions;
+      return versions.some((version) => {
+        const split = version.cli.split(".");
+        const projectVersion = ctx.PROJECT_DATA_JSON.version.split(".");
+        const isMatched = +split[0] >= +projectVersion[0] && +split[1] >= +projectVersion[1];
+        if (isMatched) selectedVersion = version;
+        ctx["selectedVersion"] = selectedVersion;
+        return !isMatched;
+      });
+    }
+    return false;
+  });
+
+  if (ctx.selectedVersion === "") {
+    const data = await ctx.promise;
+    fs.writeFileSync(`${ctx.templatesFolderDir}/templates.json`, data);
+    throw new Error("Template name doesn't exist.");
+  }
+};
+
+export { updateTemplateFolder, cloneTemplateRepo, updateTemplateList, searchTemplates };
