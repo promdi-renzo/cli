@@ -1,4 +1,4 @@
-import { getContentsUTF8FromDirname } from "./utils";
+import { getContentsUTF8FromDirname, upperCaseWordWithDashes } from "./utils";
 import * as shell from "shelljs";
 import https from "https";
 import path from "path";
@@ -82,4 +82,15 @@ const prepareProject = async (ctx: any, task: any) => {
   ctx["projectDir"] = projectDir;
 };
 
-export { updateTemplateFolder, cloneTemplateRepo, updateTemplateList, searchTemplates, cloneSelectedTemplate, prepareProject };
+const installDependency = async (ctx: any, task: any) => {
+  const projectname = upperCaseWordWithDashes(ctx.directory, true);
+  const readme = `${ctx.projectDir}/README.md`;
+  const packageJson = `${ctx.projectDir}/package.json`;
+  shell.sed("-i", /([\s|\"])(MayaJS)/g, "$1" + projectname + " $2", [readme, packageJson]);
+  shell.sed("-i", /(version)/g, "$1 " + ctx.PROJECT_DATA_JSON.version, readme);
+  shell.sed("-i", /\"mayajs\"/, `"${ctx.directory.toLowerCase()}"`, packageJson);
+  shell.cd(ctx.projectDir);
+  shell.exec("npm i --error");
+};
+
+export { updateTemplateFolder, cloneTemplateRepo, updateTemplateList, searchTemplates, cloneSelectedTemplate, prepareProject, installDependency };
