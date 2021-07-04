@@ -1,4 +1,4 @@
-import Listr from "listr";
+import { Listr } from "listr2";
 import { checkCurrentDirectory, createController, getCurrentDirectory, createModelTs, createServiceTs } from "./create";
 import { serve } from "./serve";
 import { build, cleanOutDir } from "./build";
@@ -20,7 +20,7 @@ export const createProject = async (directory: string, options: any) => {
 
   task.push({
     title: chalk.green(`Updating template folder...`),
-    task: () => {
+    task: async () => {
       const temp = `${templatesFolderDir}/temp`;
       shell.exec(`git clone https://github.com/mayajs/templates.git ${temp}`, { silent: true });
       shell.cp("-Rf", `${temp}/common`, `${templatesFolderDir}/common`);
@@ -31,7 +31,7 @@ export const createProject = async (directory: string, options: any) => {
 
   task.push({
     title: chalk.green(`Downloading files for creating your MayaJS project...`),
-    task: () => {
+    task: async () => {
       shell.rm("-rf", templatesFolderDir);
       shell.exec(`git clone https://github.com/mayajs/templates.git ${templatesFolderDir}`, { silent: true });
       shell.rm("-rf", [`${templatesFolderDir}/.git`, `${templatesFolderDir}/README.md`]);
