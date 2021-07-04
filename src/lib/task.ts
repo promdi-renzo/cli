@@ -15,11 +15,11 @@ export const chooseAction = async () => {
 
 export async function createCommand() {
   const choices = ["default", ...getTemplateList(), "custom"];
-  const question = [
+  const questions = [
     { name: "directory", message: "Enter project name" },
     { type: "list", name: "template", message: "Select a template", choices, default: choices[0] },
   ];
-  let { directory, template } = await inquirer.prompt(question);
+  let { directory, template } = await inquirer.prompt(questions);
 
   if (template === "custom") {
     const { custom } = await inquirer.prompt({ name: "custom", message: "Enter template name" });
@@ -34,6 +34,17 @@ export async function runCommand() {
   runServer(port);
 }
 
+export async function generateCommand() {
+  const choices = ["route", "controller", "service", "model"];
+  const questions = [
+    { type: "list", name: "component", message: "Select a component to generate", choices, default: choices[0] },
+    { name: "directory", message: "Enter component directory" },
+    { name: "name", message: "Enter component name" },
+  ];
+  const { directory, name, component } = await inquirer.prompt(questions);
+  createComponent(component, `${directory}/${name}`);
+}
+
 export const createProject = async (directory: string, options: any) => {
   const PACKAGE_DATA = getContentsUTF8FromDirname("../package.json");
   const PROJECT_DATA_JSON = JSON.parse(PACKAGE_DATA);
@@ -46,7 +57,7 @@ export const createProject = async (directory: string, options: any) => {
     .catch((err: any) => console.error(err));
 };
 
-export const createComponent = async (component: string, directory: string, options: any) => {
+export const createComponent = async (component: string, directory: string, options?: any) => {
   const args = { r: "route", c: "controller", s: "service", m: "model" };
   let selectedArgs = args[component.charAt(0)];
 
