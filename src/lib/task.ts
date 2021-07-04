@@ -124,7 +124,7 @@ export const createProject = async (directory: string, options: any) => {
   task.push({
     title: chalk.green(`Installing project dependencies...`),
     task: async () => {
-      const projectname = upperCaseWordWithDashes(directory);
+      const projectname = upperCaseWordWithDashes(directory, true);
       const readme = `${projectDir}/README.md`;
       const packageJson = `${projectDir}/package.json`;
       shell.sed("-i", /([\s|\"])(MayaJS)/g, "$1" + projectname + " $2", [readme, packageJson]);

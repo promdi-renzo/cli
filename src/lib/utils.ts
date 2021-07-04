@@ -27,9 +27,9 @@ export function getContentsUTF8FromDirname(relativePath: string) {
   return fs.readFileSync(FILE_PATH, "utf8");
 }
 
-export function upperCaseWordWithDashes(word: string) {
+export function upperCaseWordWithDashes(word: string, space = false) {
   const firstLetter = word.replace(/^\w/, (c) => c.toUpperCase());
   const dashedLetter = firstLetter.replace(/-\w/g, (c) => c.toUpperCase());
-  const noDashes = dashedLetter.replace(/-/g, "");
+  const noDashes = dashedLetter.replace(/-/g, space ? " " : "");
   return noDashes;
 }
