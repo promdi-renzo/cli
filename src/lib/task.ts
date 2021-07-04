@@ -48,23 +48,28 @@ export const createProject = async (directory: string, options: any) => {
     });
 
     const templateJSON = path.resolve(templatesFolderDir, "./templates.json");
-    const PACKAGE_DATA = getContentsUTF8FromDirname(templateJSON);
 
-    if (!Object.keys(JSON.parse(PACKAGE_DATA))?.length || Object.keys(PACKAGE_DATA)?.length === 0) {
-      task.push({
-        title: chalk.green(`Updating template list...`),
-        task: async () => {
-          fs.writeFileSync(`${templatesFolderDir}/templates.json`, await promise);
-        },
-      });
+    if (!fs.existsSync(templateJSON)) {
+      fs.writeFileSync(`${templatesFolderDir}/templates.json`, "{}");
     }
 
-    const DATA_JSON = JSON.parse(PACKAGE_DATA);
+    const PACKAGE_DATA = getContentsUTF8FromDirname(templateJSON);
+
+    task.push({
+      title: chalk.green(`Updating template list...`),
+      task: async (ctx: any, task: any) => {
+        fs.writeFileSync(`${templatesFolderDir}/templates.json`, await promise);
+        ctx["DATA_JSON"] = getContentsUTF8FromDirname(templateJSON);
+      },
+      enabled: () => !Object.keys(JSON.parse(PACKAGE_DATA))?.length || Object.keys(PACKAGE_DATA)?.length === 0,
+    });
+
     let selectedVersion = { version: "", url: "" };
 
     task.push({
       title: chalk.green(`Searching template list...`),
-      task: async () => {
+      task: async (ctx: any, task: any) => {
+        const DATA_JSON = JSON.parse(ctx.DATA_JSON ?? getContentsUTF8FromDirname(templateJSON));
         Object.keys(DATA_JSON).some((key) => {
           if (key === options?.template) {
             const versions: { version: string; cli: string; url: string }[] = DATA_JSON[key].versions;
@@ -73,40 +78,33 @@ export const createProject = async (directory: string, options: any) => {
               const projectVersion = PROJECT_DATA_JSON.version.split(".");
               const isMatched = +split[0] >= +projectVersion[0] && +split[1] >= +projectVersion[1];
               if (isMatched) selectedVersion = version;
-              if (selectedVersion.url !== "") shell.echo(chalk.green(`[mayajs] Template has been found!`));
+              ctx["selectedVersion"] = selectedVersion;
               return !isMatched;
             });
           }
           return false;
         });
+
+        if (ctx.selectedVersion === "") {
+          const data = await promise;
+          fs.writeFileSync(`${templatesFolderDir}/templates.json`, data);
+          throw new Error("Template name doesn't exist.");
+        }
       },
     });
 
-    if (selectedVersion.url === "") {
-      task.push({
-        title: chalk.green(`Downloading template files for your project...`),
-        task: async () => {
-          const data = await promise;
-          fs.writeFileSync(`${templatesFolderDir}/templates.json`, data);
-          shell.echo(chalk.red(`[mayajs] Template name doesn't exist.`));
-        },
-      });
-
-      const tasks: Listr = new Listr(task);
-      return tasks.run().catch((err: any) => console.error(err));
-    }
-
-    templateDir = `${templatesFolderDir}/${options?.template}/${selectedVersion.version}`;
-
-    if (!fs.existsSync(templateDir)) {
-      task.push({
-        title: chalk.green(`Downloading template files for your project...`),
-        task: async () => {
-          shell.exec(`git clone ${selectedVersion.url} ${templateDir}`, { silent: true });
-          shell.rm("-rf", [`${templateDir}/.git`]);
-        },
-      });
-    }
+    task.push({
+      title: chalk.green(`Downloading template files for your project...`),
+      task: async (ctx: any, task: any) => {
+        templateDir = `${templatesFolderDir}/${options?.template}/${ctx.selectedVersion.version}`;
+        if (fs.existsSync(ctx.templateDir)) {
+          task.skip();
+          return;
+        }
+        shell.exec(`git clone ${ctx.selectedVersion.url} ${templateDir}`, { silent: true });
+        shell.rm("-rf", [`${templateDir}/.git`]);
+      },
+    });
   }
 
   const projectDir = path.resolve(process.cwd(), directory);
