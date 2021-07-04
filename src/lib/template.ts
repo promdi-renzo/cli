@@ -93,4 +93,22 @@ const installDependency = async (ctx: any, task: any) => {
   shell.exec("npm i --error");
 };
 
-export { updateTemplateFolder, cloneTemplateRepo, updateTemplateList, searchTemplates, cloneSelectedTemplate, prepareProject, installDependency };
+const templateDir = () => path.resolve(`${__dirname}`, "../templates");
+const commonDir = `${templateDir()}/common`;
+const defaultTemplate = `${templateDir()}/default`;
+const templateExist = () => !fs.existsSync(templateDir()) || !fs.existsSync(defaultTemplate);
+const commonExist = () => () => !fs.existsSync(commonDir);
+
+export {
+  updateTemplateFolder,
+  cloneTemplateRepo,
+  updateTemplateList,
+  searchTemplates,
+  cloneSelectedTemplate,
+  prepareProject,
+  installDependency,
+  templateDir,
+  commonExist,
+  templateExist,
+  defaultTemplate,
+};
