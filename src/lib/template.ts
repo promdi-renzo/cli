@@ -1,5 +1,6 @@
 import { getContentsUTF8FromDirname, upperCaseWordWithDashes } from "./utils";
 import * as shell from "shelljs";
+import chalk from "chalk";
 import https from "https";
 import path from "path";
 import fs from "fs";
@@ -93,22 +94,23 @@ const installDependency = async (ctx: any, task: any) => {
   shell.exec("npm i --error");
 };
 
-const templateDir = () => path.resolve(`${__dirname}`, "../templates");
-const commonDir = `${templateDir()}/common`;
-const defaultTemplate = `${templateDir()}/default`;
-const templateExist = () => !fs.existsSync(templateDir()) || !fs.existsSync(defaultTemplate);
+const templateTasks = (options?: any) => {
+  const hasTemplateArgs = () => options?.template;
+  return [
+    { title: chalk.green(`Updating template folder...`), task: updateTemplateFolder, enabled: commonExist },
+    { title: chalk.green(`Downloading files for creating your MayaJS project...`), task: cloneTemplateRepo, enabled: templateExist },
+    { title: chalk.green(`Updating template list...`), task: updateTemplateList, enabled: hasTemplateArgs },
+    { title: chalk.green(`Searching template list...`), task: searchTemplates, enabled: hasTemplateArgs },
+    { title: chalk.green(`Downloading template files for your project...`), task: cloneSelectedTemplate, enabled: hasTemplateArgs },
+    { title: chalk.green(`Preparing project files and directories...`), task: prepareProject },
+    { title: chalk.green(`Installing project dependencies...`), task: installDependency },
+  ];
+};
+
+const templatesFolderDir = path.resolve(`${__dirname}`, "../templates");
+const commonDir = `${templatesFolderDir}/common`;
+const templateDir = `${templatesFolderDir}/default`;
+const templateExist = () => !fs.existsSync(templatesFolderDir) || !fs.existsSync(templateDir);
 const commonExist = () => () => !fs.existsSync(commonDir);
 
-export {
-  updateTemplateFolder,
-  cloneTemplateRepo,
-  updateTemplateList,
-  searchTemplates,
-  cloneSelectedTemplate,
-  prepareProject,
-  installDependency,
-  templateDir,
-  commonExist,
-  templateExist,
-  defaultTemplate,
-};
+export { templateDir, templatesFolderDir, templateTasks };
