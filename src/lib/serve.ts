@@ -11,12 +11,6 @@ const TEMP = "node_modules/temp";
 let hasBuildError = false;
 let hasLoaded = false;
 
-const formatHost: ts.FormatDiagnosticsHost = {
-  getCanonicalFileName: (path) => path,
-  getCurrentDirectory: ts.sys.getCurrentDirectory,
-  getNewLine: () => ts.sys.newLine,
-};
-
 function reportDiagnostic(diagnostic: ts.Diagnostic) {
   hasBuildError = true;
   console.log(errorMessage(diagnostic));
