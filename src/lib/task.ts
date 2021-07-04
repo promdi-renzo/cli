@@ -17,13 +17,14 @@ export const createProject = async (directory: string, options: any) => {
   const isTemplateExist = fs.existsSync(templatesFolderDir);
   const isDefaultExist = fs.existsSync(templateDir);
   const task = [];
+  const enableTemplate = () => options?.template;
 
   task.push({
     title: chalk.green(`Updating template folder...`),
-    task: async () => {
-      const temp = `${templatesFolderDir}/temp`;
+    task: async (ctx: any, task: any) => {
+      const temp = `${ctx.templatesFolderDir}/temp`;
       shell.exec(`git clone https://github.com/mayajs/templates.git ${temp}`, { silent: true });
-      shell.cp("-Rf", `${temp}/common`, `${templatesFolderDir}/common`);
+      shell.cp("-Rf", `${temp}/common`, `${ctx.templatesFolderDir}/common`);
       shell.rm("-rf", temp);
     },
     enabled: () => !fs.existsSync(commonDir),
@@ -31,123 +32,115 @@ export const createProject = async (directory: string, options: any) => {
 
   task.push({
     title: chalk.green(`Downloading files for creating your MayaJS project...`),
-    task: async () => {
-      shell.rm("-rf", templatesFolderDir);
-      shell.exec(`git clone https://github.com/mayajs/templates.git ${templatesFolderDir}`, { silent: true });
-      shell.rm("-rf", [`${templatesFolderDir}/.git`, `${templatesFolderDir}/README.md`]);
+    task: async (ctx: any, task: any) => {
+      shell.rm("-rf", ctx.templatesFolderDir);
+      shell.exec(`git clone https://github.com/mayajs/templates.git ${ctx.templatesFolderDir}`, { silent: true });
+      shell.rm("-rf", [`${ctx.templatesFolderDir}/.git`, `${ctx.templatesFolderDir}/README.md`]);
     },
     enabled: () => !isTemplateExist || !isDefaultExist,
   });
 
-  const PACKAGE_DATA = getContentsUTF8FromDirname("../package.json");
-  const PROJECT_DATA_JSON = JSON.parse(PACKAGE_DATA);
-
-  if (options?.template) {
-    const promise = new Promise((resolve, reject) => {
-      https
-        .get("https://raw.githubusercontent.com/mayajs/templates/master/templates.json", (res) => {
-          let data: any[] = [];
-          res.on("data", (chunk) => data.push(chunk));
-          res.on("end", () => {
-            const templateData = JSON.parse(Buffer.concat(data).toString());
-            resolve(JSON.stringify(templateData, null, 2));
-          });
-        })
-        .on("error", (err) => {
-          reject(err);
-        });
-    });
-
-    const templateJSON = path.resolve(templatesFolderDir, "./templates.json");
-
-    if (!fs.existsSync(templateJSON)) {
-      fs.writeFileSync(`${templatesFolderDir}/templates.json`, "{}");
-    }
-
-    const TEMPLATE_JSON_DATA = getContentsUTF8FromDirname(templateJSON);
-
-    task.push({
-      title: chalk.green(`Updating template list...`),
-      task: async (ctx: any, task: any) => {
-        fs.writeFileSync(`${templatesFolderDir}/templates.json`, await promise);
-        ctx["DATA_JSON"] = getContentsUTF8FromDirname(templateJSON);
-      },
-      enabled: () => !Object.keys(JSON.parse(TEMPLATE_JSON_DATA))?.length || Object.keys(TEMPLATE_JSON_DATA)?.length === 0,
-    });
-
-    let selectedVersion = { version: "", url: "" };
-
-    task.push({
-      title: chalk.green(`Searching template list...`),
-      task: async (ctx: any, task: any) => {
-        const DATA_JSON = JSON.parse(ctx.DATA_JSON ?? getContentsUTF8FromDirname(templateJSON));
-        Object.keys(DATA_JSON).some((key) => {
-          if (key === options?.template) {
-            const versions: { version: string; cli: string; url: string }[] = DATA_JSON[key].versions;
-            return versions.some((version) => {
-              const split = version.cli.split(".");
-              const projectVersion = PROJECT_DATA_JSON.version.split(".");
-              const isMatched = +split[0] >= +projectVersion[0] && +split[1] >= +projectVersion[1];
-              if (isMatched) selectedVersion = version;
-              ctx["selectedVersion"] = selectedVersion;
-              return !isMatched;
+  task.push({
+    title: chalk.green(`Updating template list...`),
+    task: async (ctx: any, task: any) => {
+      const promise = new Promise((resolve, reject) => {
+        https
+          .get("https://raw.githubusercontent.com/mayajs/templates/master/templates.json", (res) => {
+            let data: any[] = [];
+            res.on("data", (chunk) => data.push(chunk));
+            res.on("end", () => {
+              const templateData = JSON.parse(Buffer.concat(data).toString());
+              resolve(JSON.stringify(templateData, null, 2));
             });
-          }
-          return false;
-        });
+          })
+          .on("error", (err) => {
+            reject(err);
+          });
+      });
+      const templateJSON = path.resolve(ctx.templatesFolderDir, "./templates.json");
+      fs.writeFileSync(`${ctx.templatesFolderDir}/templates.json`, await promise);
+      ctx["DATA_JSON"] = getContentsUTF8FromDirname(templateJSON);
+      ctx["promise"] = promise;
+    },
+    enabled: enableTemplate,
+  });
 
-        if (ctx.selectedVersion === "") {
-          const data = await promise;
-          fs.writeFileSync(`${templatesFolderDir}/templates.json`, data);
-          throw new Error("Template name doesn't exist.");
+  task.push({
+    title: chalk.green(`Searching template list...`),
+    task: async (ctx: any, task: any) => {
+      let selectedVersion = { version: "", url: "" };
+      const DATA_JSON = JSON.parse(ctx.DATA_JSON);
+      Object.keys(DATA_JSON).some((key) => {
+        if (key === options?.template) {
+          const versions: { version: string; cli: string; url: string }[] = DATA_JSON[key].versions;
+          return versions.some((version) => {
+            const split = version.cli.split(".");
+            const projectVersion = ctx.PROJECT_DATA_JSON.version.split(".");
+            const isMatched = +split[0] >= +projectVersion[0] && +split[1] >= +projectVersion[1];
+            if (isMatched) selectedVersion = version;
+            ctx["selectedVersion"] = selectedVersion;
+            return !isMatched;
+          });
         }
-      },
-    });
+        return false;
+      });
 
-    task.push({
-      title: chalk.green(`Downloading template files for your project...`),
-      task: (ctx: any, task: any) => {
-        templateDir = `${templatesFolderDir}/${options?.template}/${ctx.selectedVersion.version}`;
-        if (fs.existsSync(ctx.templateDir)) {
-          task.skip();
-          return;
-        }
-        shell.exec(`git clone ${ctx.selectedVersion.url} ${templateDir}`, { silent: true });
-        shell.rm("-rf", [`${templateDir}/.git`]);
-      },
-    });
-  }
+      if (ctx.selectedVersion === "") {
+        const data = await ctx.promise;
+        fs.writeFileSync(`${ctx.templatesFolderDir}/templates.json`, data);
+        throw new Error("Template name doesn't exist.");
+      }
+    },
+    enabled: enableTemplate,
+  });
 
-  const projectDir = path.resolve(process.cwd(), directory);
-  const projectExist = fs.existsSync(projectDir);
-
-  if (projectExist) shell.rm("-rf", projectDir);
+  task.push({
+    title: chalk.green(`Downloading template files for your project...`),
+    task: (ctx: any, task: any) => {
+      templateDir = `${ctx.templatesFolderDir}/${options?.template}/${ctx.selectedVersion.version}`;
+      if (fs.existsSync(ctx.templateDir)) {
+        task.skip();
+        return;
+      }
+      shell.exec(`git clone ${ctx.selectedVersion.url} ${templateDir}`, { silent: true });
+      shell.rm("-rf", [`${templateDir}/.git`]);
+    },
+    enabled: enableTemplate,
+  });
 
   task.push({
     title: chalk.green(`Preparing project files and directories...`),
-    task: () => {
+    task: (ctx: any, task: any) => {
+      const projectDir = path.resolve(process.cwd(), directory);
+      const projectExist = fs.existsSync(projectDir);
+
+      if (projectExist) shell.rm("-rf", projectDir);
       shell.cp("-Rf", templateDir, projectDir);
+      ctx["projectDir"] = projectDir;
     },
   });
 
   task.push({
     title: chalk.green(`Installing project dependencies...`),
-    task: () => {
+    task: (ctx: any, task: any) => {
       const projectname = upperCaseWordWithDashes(directory, true);
-      const readme = `${projectDir}/README.md`;
-      const packageJson = `${projectDir}/package.json`;
+      const readme = `${ctx.projectDir}/README.md`;
+      const packageJson = `${ctx.projectDir}/package.json`;
       shell.sed("-i", /([\s|\"])(MayaJS)/g, "$1" + projectname + " $2", [readme, packageJson]);
-      shell.sed("-i", /(version)/g, "$1 " + PROJECT_DATA_JSON.version, readme);
+      shell.sed("-i", /(version)/g, "$1 " + ctx.PROJECT_DATA_JSON.version, readme);
       shell.sed("-i", /\"mayajs\"/, `"${directory.toLowerCase()}"`, packageJson);
-      shell.cd(projectDir);
+      shell.cd(ctx.projectDir);
       shell.exec("npm i --error");
     },
   });
 
+  const PACKAGE_DATA = getContentsUTF8FromDirname("../package.json");
+  const PROJECT_DATA_JSON = JSON.parse(PACKAGE_DATA);
   const tasks: Listr = new Listr(task);
+  const ctx = { PROJECT_DATA_JSON, templatesFolderDir };
 
   tasks
-    .run()
+    .run(ctx)
     .then(() => {
       shell.echo(chalk.yellow(`[mayajs] Running your project for the first time...`));
       runServer({ port: 3333 });
