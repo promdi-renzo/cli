@@ -11,7 +11,7 @@ let hasBuildError = false;
 let hasLoaded = false;
 
 const formatHost: ts.FormatDiagnosticsHost = {
-  getCanonicalFileName: path => path,
+  getCanonicalFileName: (path) => path,
   getCurrentDirectory: ts.sys.getCurrentDirectory,
   getNewLine: () => ts.sys.newLine,
 };
@@ -27,17 +27,18 @@ function reportWatchStatusChanged(diagnostic: ts.Diagnostic) {
 }
 
 function spawnCommand(port: number) {
-  const cmd = spawn(`node build/index.js --port=${port}`, [], { shell: true });
+  const temp = `${process.cwd()}/node_modules/temp`;
+  const cmd = spawn(`node ${temp}/index.js --port=${port}`, [], { shell: true });
 
-  cmd.stdout.on("data", data => {
+  cmd.stdout.on("data", (data) => {
     console.log(`${data}`.trimEnd());
   });
 
-  cmd.stderr.on("data", data => {
+  cmd.stderr.on("data", (data) => {
     console.log(chalk.red(`[mayajs]`), `${data}`);
   });
 
-  cmd.on("error", err => {
+  cmd.on("error", (err) => {
     throw new Error("Error: Can't start server failed. " + err);
   });
 }
@@ -83,10 +84,7 @@ async function killUsedPort(port: number, tries = 1): Promise<any> {
       }
     };
 
-    exec(`netstat -ano | findstr :${port}`)
-      .then(taskKill(port))
-      .then(portTerminated)
-      .catch(catchError);
+    exec(`netstat -ano | findstr :${port}`).then(taskKill(port)).then(portTerminated).catch(catchError);
   });
 }
 
@@ -115,7 +113,7 @@ export function serve(port: number) {
   const json = JSON.parse(fs.readFileSync("package.json", "utf8"));
   const dependencies = json.dependencies;
 
-  const isMayaJS = Object.keys(dependencies).filter((key: string) => key.includes("@mayajs")).length > 0;
+  const isMayaJS = Object.keys(dependencies).filter((key: string) => key.includes("@mayajs/core")).length > 0;
 
   if (!isMayaJS) {
     throw new Error(chalk.red("Couldn't find '@mayajs/core' module in this project."));
@@ -128,7 +126,8 @@ export function serve(port: number) {
   }
 
   const createProgram = ts.createSemanticDiagnosticsBuilderProgram;
-  const host = ts.createWatchCompilerHost(configPath, { outDir: `build` }, ts.sys, createProgram, reportDiagnostic, reportWatchStatusChanged);
+  const outDir = `${process.cwd()}/node_modules/temp`;
+  const host = ts.createWatchCompilerHost(configPath, { outDir }, ts.sys, createProgram, reportDiagnostic, reportWatchStatusChanged);
   const origCreateProgram = host.createProgram;
 
   host.createProgram = (rootNames: ReadonlyArray<string> | undefined, options, host, oldProgram) => {
