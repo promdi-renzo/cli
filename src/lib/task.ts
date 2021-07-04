@@ -3,58 +3,43 @@ import { checkCurrentDirectory, createController, getCurrentDirectory, createMod
 import { serve } from "./serve";
 import { build, cleanOutDir } from "./build";
 import chalk from "chalk";
-import path from "path";
-import * as shell from "shelljs";
-import fs from "fs";
 import { getContentsUTF8FromDirname, upperCaseWordWithDashes } from "./utils";
 import inquirer from "inquirer";
-import { cloneSelectedTemplate, cloneTemplateRepo, prepareProject, searchTemplates, updateTemplateFolder, updateTemplateList } from "./template";
+import {
+  cloneSelectedTemplate,
+  cloneTemplateRepo,
+  commonExist,
+  defaultTemplate,
+  installDependency,
+  prepareProject,
+  searchTemplates,
+  templateDir,
+  templateExist,
+  updateTemplateFolder,
+  updateTemplateList,
+} from "./template";
 
 export const createProject = async (directory: string, options: any) => {
-  const templatesFolderDir = path.resolve(`${__dirname}`, "../templates");
-  const commonDir = `${templatesFolderDir}/common`;
-  let templateDir = `${templatesFolderDir}/default`;
-  const isTemplateExist = fs.existsSync(templatesFolderDir);
-  const isDefaultExist = fs.existsSync(templateDir);
-  const isTemplateFilesExist = () => !isTemplateExist || !isDefaultExist;
-  const enableTemplate = () => options?.template;
-  const task = [];
-
-  task.push({ title: chalk.green(`Updating template folder...`), task: updateTemplateFolder, enabled: () => !fs.existsSync(commonDir) });
-  task.push({ title: chalk.green(`Downloading files for creating your MayaJS project...`), task: cloneTemplateRepo, enabled: isTemplateFilesExist });
-  task.push({ title: chalk.green(`Updating template list...`), task: updateTemplateList, enabled: enableTemplate });
-  task.push({ title: chalk.green(`Searching template list...`), task: searchTemplates, enabled: enableTemplate });
-  task.push({ title: chalk.green(`Downloading template files for your project...`), task: cloneSelectedTemplate, enabled: enableTemplate });
-  task.push({ title: chalk.green(`Preparing project files and directories...`), task: prepareProject });
-
-  task.push({
-    title: chalk.green(`Installing project dependencies...`),
-    task: (ctx: any, task: any) => {
-      const projectname = upperCaseWordWithDashes(directory, true);
-      const readme = `${ctx.projectDir}/README.md`;
-      const packageJson = `${ctx.projectDir}/package.json`;
-      shell.sed("-i", /([\s|\"])(MayaJS)/g, "$1" + projectname + " $2", [readme, packageJson]);
-      shell.sed("-i", /(version)/g, "$1 " + ctx.PROJECT_DATA_JSON.version, readme);
-      shell.sed("-i", /\"mayajs\"/, `"${directory.toLowerCase()}"`, packageJson);
-      shell.cd(ctx.projectDir);
-      shell.exec("npm i --error");
-    },
-  });
+  const hasTemplateArgs = () => options?.template;
+  const task = [
+    { title: chalk.green(`Updating template folder...`), task: updateTemplateFolder, enabled: commonExist },
+    { title: chalk.green(`Downloading files for creating your MayaJS project...`), task: cloneTemplateRepo, enabled: templateExist },
+    { title: chalk.green(`Updating template list...`), task: updateTemplateList, enabled: hasTemplateArgs },
+    { title: chalk.green(`Searching template list...`), task: searchTemplates, enabled: hasTemplateArgs },
+    { title: chalk.green(`Downloading template files for your project...`), task: cloneSelectedTemplate, enabled: hasTemplateArgs },
+    { title: chalk.green(`Preparing project files and directories...`), task: prepareProject },
+    { title: chalk.green(`Installing project dependencies...`), task: installDependency },
+  ];
 
   const PACKAGE_DATA = getContentsUTF8FromDirname("../package.json");
   const PROJECT_DATA_JSON = JSON.parse(PACKAGE_DATA);
   const tasks: Listr = new Listr(task);
-  const ctx = { PROJECT_DATA_JSON, directory, templatesFolderDir, templateDir, template: options?.template };
+  const ctx = { PROJECT_DATA_JSON, directory, templatesFolderDir: templateDir(), templateDir: defaultTemplate, template: options?.template };
 
   tasks
     .run(ctx)
-    .then(() => {
-      shell.echo(chalk.yellow(`[mayajs] Running your project for the first time...`));
-      runServer({ port: 3333 });
-    })
-    .catch((err: any) => {
-      console.error(err);
-    });
+    .then(() => runServer({ port: 3333 }))
+    .catch((err: any) => console.error(err));
 };
 
 export const createComponent = async (component: string, directory: string, options: any) => {
