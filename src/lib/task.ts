@@ -8,7 +8,7 @@ import * as shell from "shelljs";
 import fs from "fs";
 import { getContentsUTF8FromDirname, upperCaseWordWithDashes } from "./utils";
 import inquirer from "inquirer";
-import { cloneSelectedTemplate, cloneTemplateRepo, searchTemplates, updateTemplateFolder, updateTemplateList } from "./template";
+import { cloneSelectedTemplate, cloneTemplateRepo, prepareProject, searchTemplates, updateTemplateFolder, updateTemplateList } from "./template";
 
 export const createProject = async (directory: string, options: any) => {
   const templatesFolderDir = path.resolve(`${__dirname}`, "../templates");
@@ -17,26 +17,15 @@ export const createProject = async (directory: string, options: any) => {
   const isTemplateExist = fs.existsSync(templatesFolderDir);
   const isDefaultExist = fs.existsSync(templateDir);
   const isTemplateFilesExist = () => !isTemplateExist || !isDefaultExist;
-  const task = [];
   const enableTemplate = () => options?.template;
+  const task = [];
 
   task.push({ title: chalk.green(`Updating template folder...`), task: updateTemplateFolder, enabled: () => !fs.existsSync(commonDir) });
   task.push({ title: chalk.green(`Downloading files for creating your MayaJS project...`), task: cloneTemplateRepo, enabled: isTemplateFilesExist });
   task.push({ title: chalk.green(`Updating template list...`), task: updateTemplateList, enabled: enableTemplate });
   task.push({ title: chalk.green(`Searching template list...`), task: searchTemplates, enabled: enableTemplate });
   task.push({ title: chalk.green(`Downloading template files for your project...`), task: cloneSelectedTemplate, enabled: enableTemplate });
-
-  task.push({
-    title: chalk.green(`Preparing project files and directories...`),
-    task: (ctx: any, task: any) => {
-      const projectDir = path.resolve(process.cwd(), directory);
-      const projectExist = fs.existsSync(projectDir);
-
-      if (projectExist) shell.rm("-rf", projectDir);
-      shell.cp("-Rf", templateDir, projectDir);
-      ctx["projectDir"] = projectDir;
-    },
-  });
+  task.push({ title: chalk.green(`Preparing project files and directories...`), task: prepareProject });
 
   task.push({
     title: chalk.green(`Installing project dependencies...`),
@@ -55,7 +44,7 @@ export const createProject = async (directory: string, options: any) => {
   const PACKAGE_DATA = getContentsUTF8FromDirname("../package.json");
   const PROJECT_DATA_JSON = JSON.parse(PACKAGE_DATA);
   const tasks: Listr = new Listr(task);
-  const ctx = { PROJECT_DATA_JSON, templatesFolderDir, templateDir, template: options?.template };
+  const ctx = { PROJECT_DATA_JSON, directory, templatesFolderDir, templateDir, template: options?.template };
 
   tasks
     .run(ctx)
