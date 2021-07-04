@@ -5,19 +5,19 @@ import { build, cleanOutDir } from "./build";
 import chalk from "chalk";
 import { getContentsUTF8FromDirname, upperCaseWordWithDashes } from "./utils";
 import inquirer from "inquirer";
-import { templateDir, templatesFolderDir, templateTasks } from "./template";
+import { getTemplateList, templateDir, templatesFolderDir, templateTasks } from "./template";
 
 export const chooseAction = async () => {
   const choices = ["create", "generate", "run", "build", "help"];
-  const question = { type: "list", name: "action", message: "Choose an action you want to perform", choices, default: choices[0] };
+  const question = { type: "list", name: "action", message: "Select an action you want to perform", choices, default: choices[0] };
   return await inquirer.prompt([question]);
 };
 
 export const createCommand = async () => {
-  const choices = ["default", "custom"];
+  const choices = ["default", ...getTemplateList(), "custom"];
   const question = [
     { name: "directory", message: "Enter project name" },
-    { type: "list", name: "template", message: "Choose a template", choices, default: choices[0] },
+    { type: "list", name: "template", message: "Select a template", choices, default: choices[0] },
   ];
   let { directory, template } = await inquirer.prompt(question);
 
