@@ -9,7 +9,7 @@ import { templateDir, templatesFolderDir, templateTasks } from "./template";
 
 export const chooseAction = async () => {
   const choices = ["create", "generate", "run", "build", "help"];
-  const question = { type: "list", name: "schema", message: "Choose a schema", choices, default: choices[0] };
+  const question = { type: "list", name: "action", message: "Choose an action you want to perform", choices, default: choices[0] };
   return await inquirer.prompt([question]);
 };
 
