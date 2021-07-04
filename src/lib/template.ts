@@ -73,4 +73,13 @@ const cloneSelectedTemplate = async (ctx: any, task: any) => {
   shell.rm("-rf", [`${ctx.templateDir}/.git`]);
 };
 
-export { updateTemplateFolder, cloneTemplateRepo, updateTemplateList, searchTemplates, cloneSelectedTemplate };
+const prepareProject = async (ctx: any, task: any) => {
+  const projectDir = path.resolve(process.cwd(), ctx.directory);
+  const projectExist = fs.existsSync(projectDir);
+
+  if (projectExist) shell.rm("-rf", projectDir);
+  shell.cp("-Rf", ctx.templateDir, projectDir);
+  ctx["projectDir"] = projectDir;
+};
+
+export { updateTemplateFolder, cloneTemplateRepo, updateTemplateList, searchTemplates, cloneSelectedTemplate, prepareProject };
