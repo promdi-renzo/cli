@@ -63,4 +63,14 @@ const searchTemplates = async (ctx: any, task: any) => {
   }
 };
 
-export { updateTemplateFolder, cloneTemplateRepo, updateTemplateList, searchTemplates };
+const cloneSelectedTemplate = async (ctx: any, task: any) => {
+  ctx.templateDir = `${ctx.templatesFolderDir}/${ctx?.template}/${ctx.selectedVersion.version}`;
+  if (fs.existsSync(ctx.templateDir)) {
+    task.skip();
+    return;
+  }
+  shell.exec(`git clone ${ctx.selectedVersion.url} ${ctx.templateDir}`, { silent: true });
+  shell.rm("-rf", [`${ctx.templateDir}/.git`]);
+};
+
+export { updateTemplateFolder, cloneTemplateRepo, updateTemplateList, searchTemplates, cloneSelectedTemplate };
