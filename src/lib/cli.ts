@@ -101,7 +101,7 @@ export default function runCLI(npm: NpmPackage) {
         const commands = {
           help: program.outputHelp,
           create: createCommand,
-          build: () => {},
+          build: buildProject,
           generate: () => {},
           run: () => {},
         };
