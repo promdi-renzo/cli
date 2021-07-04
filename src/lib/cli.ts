@@ -99,7 +99,7 @@ export default function runCLI(npm: NpmPackage) {
     chooseAction()
       .then((options) => {
         const commands = {
-          help: program.outputHelp,
+          help: () => program.outputHelp(),
           create: createCommand,
           build: buildProject,
           generate: generateCommand,
