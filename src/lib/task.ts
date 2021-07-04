@@ -13,7 +13,7 @@ export const chooseAction = async () => {
   return await inquirer.prompt([question]);
 };
 
-export const createCommand = async () => {
+export async function createCommand() {
   const choices = ["default", ...getTemplateList(), "custom"];
   const question = [
     { name: "directory", message: "Enter project name" },
@@ -27,7 +27,12 @@ export const createCommand = async () => {
   }
 
   createProject(directory, { template });
-};
+}
+
+export async function runCommand() {
+  const { port } = await inquirer.prompt([{ name: "port", message: "Enter port number", default: 3333 }]);
+  runServer(port);
+}
 
 export const createProject = async (directory: string, options: any) => {
   const PACKAGE_DATA = getContentsUTF8FromDirname("../package.json");
@@ -94,7 +99,7 @@ function taskTitle(type: string, value: string) {
 export async function runServer(cmd: any) {
   try {
     cleanOutDir({ outDir: process.cwd() + "/dist" });
-    serve(cmd.port ? cmd.port : 3333);
+    serve(cmd?.port ? cmd.port : 3333);
   } catch (error) {
     console.log(error.message);
     process.exit();
