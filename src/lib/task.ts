@@ -9,7 +9,7 @@ import fs from "fs";
 import { getContentsUTF8FromDirname, upperCaseWordWithDashes } from "./utils";
 import https from "https";
 import inquirer from "inquirer";
-import { updateTemplateFolder } from "./template";
+import { cloneTemplateRepo, updateTemplateFolder } from "./template";
 
 export const createProject = async (directory: string, options: any) => {
   const templatesFolderDir = path.resolve(`${__dirname}`, "../templates");
@@ -17,20 +17,12 @@ export const createProject = async (directory: string, options: any) => {
   let templateDir = `${templatesFolderDir}/default`;
   const isTemplateExist = fs.existsSync(templatesFolderDir);
   const isDefaultExist = fs.existsSync(templateDir);
+  const isTemplateFilesExist = () => !isTemplateExist || !isDefaultExist;
   const task = [];
   const enableTemplate = () => options?.template;
 
   task.push({ title: chalk.green(`Updating template folder...`), task: updateTemplateFolder, enabled: () => !fs.existsSync(commonDir) });
-
-  task.push({
-    title: chalk.green(`Downloading files for creating your MayaJS project...`),
-    task: async (ctx: any, task: any) => {
-      shell.rm("-rf", ctx.templatesFolderDir);
-      shell.exec(`git clone https://github.com/mayajs/templates.git ${ctx.templatesFolderDir}`, { silent: true });
-      shell.rm("-rf", [`${ctx.templatesFolderDir}/.git`, `${ctx.templatesFolderDir}/README.md`]);
-    },
-    enabled: () => !isTemplateExist || !isDefaultExist,
-  });
+  task.push({ title: chalk.green(`Downloading files for creating your MayaJS project...`), task: cloneTemplateRepo, enabled: isTemplateFilesExist });
 
   task.push({
     title: chalk.green(`Updating template list...`),
