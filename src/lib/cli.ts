@@ -12,11 +12,7 @@ interface NpmPackage {
 }
 
 export default function runCLI(npm: NpmPackage) {
-  program
-    .version(npm.version, "-v, --version")
-    .name("maya")
-    .usage("[options | command] [arguments]")
-    .description(npm.description);
+  program.version(npm.version, "-v, --version").name("maya").usage("[options | command] [arguments]").description(npm.description);
 
   program
     .command("new <directory>")
@@ -41,18 +37,28 @@ export default function runCLI(npm: NpmPackage) {
     .option("-s, --schema=[schema]", "Specify schema model")
     .description(
       `
-    Creates a new component.
+    Creates a new mayajs component.
 
     ROUTE
-    ${chalk.green("maya generate route sample")} | ${chalk.green("maya g r sample\n")}
+    ${chalk.green("maya generate route sample")} | ${chalk.green("maya g r sample")}
+
     CONTROLLER
-    ${chalk.green("maya generate controller sample")} | ${chalk.green("maya g c sample\n")}
+    ${chalk.green("maya generate controller sample")} | ${chalk.green("maya g c sample")}
+
     SERVICE
-    ${chalk.green("maya generate service sample")} | ${chalk.green("maya g s sample\n")}
-    MODEL MONGO SCHEMA
-    ${chalk.green("maya generate model sample schema=mongo")} | ${chalk.green("maya g m sample schema=mongo\n")}
-    MODEL SQL SCHEMA
-    ${chalk.green("maya generate model sample schema=sql")} | ${chalk.green("maya g m sample schema=sql")}
+    ${chalk.green("maya generate service sample")} | ${chalk.green("maya g s sample")}
+
+    MODEL
+    ${chalk.green("maya generate model sample")} | ${chalk.green("maya g m sample")}
+
+      OPTIONS:
+      -s,--schema   Set model schema
+
+      For MongoDB
+      ${chalk.green("maya g m sample --schema=mongo")}
+
+      For SQL Databases
+      ${chalk.green("maya g m sample --schema=sql")}
     `
     )
     .action(createComponent);
@@ -78,7 +84,8 @@ export default function runCLI(npm: NpmPackage) {
     .command("build")
     .alias("b")
     .description(
-      `Build project.
+      `
+    Build project.
     ${chalk.green("maya build")} | ${chalk.green("maya b")}`
     )
     .action(buildProject);
