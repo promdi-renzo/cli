@@ -13,6 +13,22 @@ export const chooseAction = async () => {
   return await inquirer.prompt([question]);
 };
 
+export const createCommand = async () => {
+  const choices = ["default", "custom"];
+  const question = [
+    { name: "directory", message: "Enter project name" },
+    { type: "list", name: "template", message: "Choose a template", choices, default: choices[0] },
+  ];
+  let { directory, template } = await inquirer.prompt(question);
+
+  if (template === "custom") {
+    const { custom } = await inquirer.prompt({ name: "custom", message: "Enter template name" });
+    template = custom;
+  }
+
+  createProject(directory, { template });
+};
+
 export const createProject = async (directory: string, options: any) => {
   const PACKAGE_DATA = getContentsUTF8FromDirname("../package.json");
   const PROJECT_DATA_JSON = JSON.parse(PACKAGE_DATA);
