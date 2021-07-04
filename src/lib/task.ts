@@ -7,6 +7,12 @@ import { getContentsUTF8FromDirname, upperCaseWordWithDashes } from "./utils";
 import inquirer from "inquirer";
 import { templateDir, templatesFolderDir, templateTasks } from "./template";
 
+export const chooseAction = async () => {
+  const choices = ["create", "generate", "run", "build", "help"];
+  const question = { type: "list", name: "schema", message: "Choose a schema", choices, default: choices[0] };
+  return await inquirer.prompt([question]);
+};
+
 export const createProject = async (directory: string, options: any) => {
   const PACKAGE_DATA = getContentsUTF8FromDirname("../package.json");
   const PROJECT_DATA_JSON = JSON.parse(PACKAGE_DATA);
