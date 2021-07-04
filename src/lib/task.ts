@@ -8,7 +8,7 @@ import inquirer from "inquirer";
 import { getTemplateList, templateDir, templatesFolderDir, templateTasks } from "./template";
 
 export const chooseAction = async () => {
-  const choices = ["create", "generate", "run", "build", "help"];
+  const choices = ["create", "generate", "run", "build", "help", "quit"];
   const question = { type: "list", name: "action", message: "Select an action you want to perform", choices, default: choices[0] };
   return await inquirer.prompt([question]);
 };

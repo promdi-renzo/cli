@@ -104,6 +104,7 @@ export default function runCLI(npm: NpmPackage) {
           build: buildProject,
           generate: generateCommand,
           run: runCommand,
+          quit: () => process.exit(),
         };
         commands[options.action]();
       })
