@@ -6,6 +6,8 @@ import path from "path";
 import fs from "fs";
 
 const getTemplateList = () => {
+  if (!fs.existsSync(templatesFolderDir)) return [];
+
   const templateJSON = path.resolve(templatesFolderDir, "./templates.json");
   const templates = JSON.parse(getContentsUTF8FromDirname(templateJSON));
   return Object.keys(templates);
