@@ -6,6 +6,7 @@ import { errorMessage } from "./utils";
 import fs = require("fs");
 
 const exec = util.promisify(require("child_process").exec);
+const TEMP = "node_modules/temp";
 
 let hasBuildError = false;
 let hasLoaded = false;
@@ -27,7 +28,7 @@ function reportWatchStatusChanged(diagnostic: ts.Diagnostic) {
 }
 
 function spawnCommand(port: number) {
-  const temp = `${process.cwd()}/node_modules/temp`;
+  const temp = `${process.cwd()}/${TEMP}`;
   const cmd = spawn(`node ${temp}/index.js --port=${port}`, [], { shell: true });
 
   cmd.stdout.on("data", (data) => {
@@ -126,7 +127,7 @@ export function serve(port: number) {
   }
 
   const createProgram = ts.createSemanticDiagnosticsBuilderProgram;
-  const outDir = `${process.cwd()}/node_modules/temp`;
+  const outDir = `${process.cwd()}/${TEMP}`;
   const host = ts.createWatchCompilerHost(configPath, { outDir }, ts.sys, createProgram, reportDiagnostic, reportWatchStatusChanged);
   const origCreateProgram = host.createProgram;
 
