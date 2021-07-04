@@ -5,6 +5,12 @@ import https from "https";
 import path from "path";
 import fs from "fs";
 
+const getTemplateList = () => {
+  const templateJSON = path.resolve(templatesFolderDir, "./templates.json");
+  const templates = JSON.parse(getContentsUTF8FromDirname(templateJSON));
+  return Object.keys(templates);
+};
+
 const updateTemplateFolder = async (ctx: any, task: any) => {
   const temp = `${ctx.templatesFolderDir}/temp`;
   shell.exec(`git clone https://github.com/mayajs/templates.git ${temp}`, { silent: true });
@@ -113,4 +119,4 @@ const templateDir = `${templatesFolderDir}/default`;
 const templateExist = () => !fs.existsSync(templatesFolderDir) || !fs.existsSync(templateDir);
 const commonExist = () => !fs.existsSync(commonDir);
 
-export { templateDir, templatesFolderDir, templateTasks };
+export { templateDir, templatesFolderDir, templateTasks, getTemplateList };
