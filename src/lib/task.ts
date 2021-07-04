@@ -9,7 +9,7 @@ import fs from "fs";
 import { getContentsUTF8FromDirname, upperCaseWordWithDashes } from "./utils";
 import https from "https";
 import inquirer from "inquirer";
-import { cloneTemplateRepo, updateTemplateFolder } from "./template";
+import { cloneTemplateRepo, updateTemplateFolder, updateTemplateList } from "./template";
 
 export const createProject = async (directory: string, options: any) => {
   const templatesFolderDir = path.resolve(`${__dirname}`, "../templates");
@@ -23,31 +23,7 @@ export const createProject = async (directory: string, options: any) => {
 
   task.push({ title: chalk.green(`Updating template folder...`), task: updateTemplateFolder, enabled: () => !fs.existsSync(commonDir) });
   task.push({ title: chalk.green(`Downloading files for creating your MayaJS project...`), task: cloneTemplateRepo, enabled: isTemplateFilesExist });
-
-  task.push({
-    title: chalk.green(`Updating template list...`),
-    task: async (ctx: any, task: any) => {
-      const promise = new Promise((resolve, reject) => {
-        https
-          .get("https://raw.githubusercontent.com/mayajs/templates/master/templates.json", (res) => {
-            let data: any[] = [];
-            res.on("data", (chunk) => data.push(chunk));
-            res.on("end", () => {
-              const templateData = JSON.parse(Buffer.concat(data).toString());
-              resolve(JSON.stringify(templateData, null, 2));
-            });
-          })
-          .on("error", (err) => {
-            reject(err);
-          });
-      });
-      const templateJSON = path.resolve(ctx.templatesFolderDir, "./templates.json");
-      fs.writeFileSync(`${ctx.templatesFolderDir}/templates.json`, await promise);
-      ctx["DATA_JSON"] = getContentsUTF8FromDirname(templateJSON);
-      ctx["promise"] = promise;
-    },
-    enabled: enableTemplate,
-  });
+  task.push({ title: chalk.green(`Updating template list...`), task: updateTemplateList, enabled: enableTemplate });
 
   task.push({
     title: chalk.green(`Searching template list...`),
