@@ -3,6 +3,9 @@ import * as shell from "shelljs";
 import * as fs from "fs";
 import { getContentsUTF8FromDirname, upperCaseWordWithDashes } from "./utils";
 
+const TEMPLATE_DIR = "../templates";
+const COMMON_DIR = `${TEMPLATE_DIR}/common`;
+
 export function checkCurrentDirectory(name: string) {
   const curDir = getCurrentDirectory(name);
   createDirectory(curDir);
@@ -106,7 +109,7 @@ export function createAppController(appName: string) {
 export async function createController(object: { directory: string; name: string; noImports?: boolean }) {
   const { directory, name, noImports = false } = object;
   const isApp = name === "app";
-  const CONTENTS = getContentsUTF8FromDirname("../files/controller");
+  const CONTENTS = getContentsUTF8FromDirname(`${COMMON_DIR}/controller`);
   const services = upperCaseWordWithDashes(name) + "Services";
   const updatedConstructor = CONTENTS.replace(/#constructor/g, `private services: ${services}`);
   const body = noImports || isApp ? CONTENTS.replace(/[\n|\r]\s+?constructor\(#constructor\) {}[\n|\r]{2,}/g, "\n") : updatedConstructor;
@@ -118,14 +121,14 @@ export async function createController(object: { directory: string; name: string
 
 export async function createModelTs(object: { directory: string; name: string; schema: string }) {
   const { directory, name, schema } = object;
-  const CONTENTS = getContentsUTF8FromDirname(`../files/model-${schema}`);
+  const CONTENTS = getContentsUTF8FromDirname(`${COMMON_DIR}/model-${schema}`);
   const DATA = updateNames(CONTENTS, name);
   fs.writeFileSync(path.resolve(`${directory}.model.ts`), DATA);
 }
 
 export async function createServiceTs(object: { directory: string; name: string; start?: boolean }) {
   const { directory, name } = object;
-  const CONTENTS = getContentsUTF8FromDirname("../files/service");
+  const CONTENTS = getContentsUTF8FromDirname(`${COMMON_DIR}/service`);
   const updatedSerices = updateServicesName(CONTENTS, name);
   const DATA = updateNames(updatedSerices, name);
   fs.writeFileSync(path.resolve(`${directory}.service.ts`), DATA);
