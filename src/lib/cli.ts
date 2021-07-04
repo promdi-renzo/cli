@@ -3,7 +3,7 @@ import figlet from "figlet";
 import chalk from "chalk";
 
 // TASKS
-import { createProject, createComponent, runServer, buildProject, chooseAction } from "./task";
+import { createProject, createComponent, runServer, buildProject, chooseAction, createCommand } from "./task";
 
 // INTERFACE
 interface NpmPackage {
@@ -25,7 +25,7 @@ export default function runCLI(npm: NpmPackage) {
     ${chalk.green("maya new my-new-app")} | ${chalk.green("maya n my-new-app")}
 
     OPTIONS:
-      -t,--template   Set project template
+    -t,--template   Set project template
 
     ${chalk.green("maya n my-new-app --template=todo")} |  ${chalk.green("maya n my-new-app -t=todo")}
     `
@@ -99,7 +99,11 @@ export default function runCLI(npm: NpmPackage) {
     chooseAction()
       .then((options) => {
         const commands = {
-          help: () => program.outputHelp(),
+          help: program.outputHelp,
+          create: createCommand,
+          build: () => {},
+          generate: () => {},
+          run: () => {},
         };
         commands[options.action]();
       })
