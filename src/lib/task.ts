@@ -7,9 +7,8 @@ import path from "path";
 import * as shell from "shelljs";
 import fs from "fs";
 import { getContentsUTF8FromDirname, upperCaseWordWithDashes } from "./utils";
-import https from "https";
 import inquirer from "inquirer";
-import { cloneTemplateRepo, updateTemplateFolder, updateTemplateList } from "./template";
+import { cloneTemplateRepo, searchTemplates, updateTemplateFolder, updateTemplateList } from "./template";
 
 export const createProject = async (directory: string, options: any) => {
   const templatesFolderDir = path.resolve(`${__dirname}`, "../templates");
@@ -24,35 +23,7 @@ export const createProject = async (directory: string, options: any) => {
   task.push({ title: chalk.green(`Updating template folder...`), task: updateTemplateFolder, enabled: () => !fs.existsSync(commonDir) });
   task.push({ title: chalk.green(`Downloading files for creating your MayaJS project...`), task: cloneTemplateRepo, enabled: isTemplateFilesExist });
   task.push({ title: chalk.green(`Updating template list...`), task: updateTemplateList, enabled: enableTemplate });
-
-  task.push({
-    title: chalk.green(`Searching template list...`),
-    task: async (ctx: any, task: any) => {
-      let selectedVersion = { version: "", url: "" };
-      const DATA_JSON = JSON.parse(ctx.DATA_JSON);
-      Object.keys(DATA_JSON).some((key) => {
-        if (key === options?.template) {
-          const versions: { version: string; cli: string; url: string }[] = DATA_JSON[key].versions;
-          return versions.some((version) => {
-            const split = version.cli.split(".");
-            const projectVersion = ctx.PROJECT_DATA_JSON.version.split(".");
-            const isMatched = +split[0] >= +projectVersion[0] && +split[1] >= +projectVersion[1];
-            if (isMatched) selectedVersion = version;
-            ctx["selectedVersion"] = selectedVersion;
-            return !isMatched;
-          });
-        }
-        return false;
-      });
-
-      if (ctx.selectedVersion === "") {
-        const data = await ctx.promise;
-        fs.writeFileSync(`${ctx.templatesFolderDir}/templates.json`, data);
-        throw new Error("Template name doesn't exist.");
-      }
-    },
-    enabled: enableTemplate,
-  });
+  task.push({ title: chalk.green(`Searching template list...`), task: searchTemplates, enabled: enableTemplate });
 
   task.push({
     title: chalk.green(`Downloading template files for your project...`),
@@ -97,7 +68,7 @@ export const createProject = async (directory: string, options: any) => {
   const PACKAGE_DATA = getContentsUTF8FromDirname("../package.json");
   const PROJECT_DATA_JSON = JSON.parse(PACKAGE_DATA);
   const tasks: Listr = new Listr(task);
-  const ctx = { PROJECT_DATA_JSON, templatesFolderDir };
+  const ctx = { PROJECT_DATA_JSON, templatesFolderDir, template: options?.template };
 
   tasks
     .run(ctx)
