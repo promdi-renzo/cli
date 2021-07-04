@@ -1,51 +1,84 @@
-import Listr from "listr";
-import {
-  createIndex,
-  createReadMe,
-  checkCurrentDirectory,
-  createPackageJSON,
-  createGitIgnore,
-  createTsConfig,
-  createAppModule,
-  createAppRoutingModule,
-  createEnvironment,
-  createController,
-  getCurrentDirectory,
-  createModelTs,
-  createServiceTs,
-  gitInit,
-  installDependency,
-  createAppController,
-} from "./create";
+import { Listr } from "listr2";
+import { checkCurrentDirectory, createController, getCurrentDirectory, createModelTs, createServiceTs } from "./create";
 import { serve } from "./serve";
 import { build, cleanOutDir } from "./build";
 import chalk from "chalk";
+import { getContentsUTF8FromDirname, upperCaseWordWithDashes } from "./utils";
+import inquirer from "inquirer";
+import { getTemplateList, templateDir, templatesFolderDir, templateTasks } from "./template";
 
-export const createProject = (directory: string) => {
-  checkCurrentDirectory(directory);
-
-  const tasks = new Listr([
-    { title: taskTitle("create", `${directory}/src/index.ts`), task: createIndex },
-    { title: taskTitle("create", `${directory}/src/app.module.ts`), task: createAppModule },
-    { title: taskTitle("create", `${directory}/src/app.routing.module.ts`), task: createAppRoutingModule },
-    { title: taskTitle("create", `${directory}/src/environment`), task: createEnvironment },
-    { title: taskTitle("create", `${directory}/src/controller`), task: createAppController },
-    { title: taskTitle("create", `${directory}/README.md`), task: createReadMe },
-    { title: taskTitle("create", `${directory}/.gitignore`), task: createGitIgnore },
-    { title: taskTitle("create", `${directory}/package.json`), task: createPackageJSON },
-    { title: taskTitle("create", `${directory}/tsconfig.json`), task: createTsConfig },
-    { title: taskTitle("execute", "Initialize git repository"), task: gitInit },
-    { title: taskTitle("execute", "Install project dependencies"), task: installDependency },
-  ]);
-
-  tasks.run(directory).catch((err: any) => {
-    console.error(err);
-  });
+export const chooseAction = async () => {
+  const choices = ["create", "generate", "run", "build", "help", "quit"];
+  const question = { type: "list", name: "action", message: "Select an action you want to perform", choices, default: choices[0] };
+  return await inquirer.prompt([question]);
 };
 
-export const createComponent = (component: string, directory: string, options: any) => {
+export async function createCommand() {
+  const choices = ["default", ...getTemplateList(), "custom"];
+  const questions = [
+    { name: "directory", message: "Enter project name" },
+    { type: "list", name: "template", message: "Select a template", choices, default: choices[0] },
+  ];
+  let { directory, template } = await inquirer.prompt(questions);
+
+  if (template === "custom") {
+    const { custom } = await inquirer.prompt({ name: "custom", message: "Enter template name" });
+    template = custom;
+  }
+
+  createProject(directory, { template });
+}
+
+export async function runCommand() {
+  const { port } = await inquirer.prompt([{ name: "port", message: "Enter port number", default: 3333 }]);
+  runServer(port);
+}
+
+export async function generateCommand() {
+  const choices = ["route", "controller", "service", "model"];
+  const questions = [
+    { type: "list", name: "component", message: "Select a component to generate", choices, default: choices[0] },
+    { name: "directory", message: "Enter component directory" },
+    { name: "name", message: "Enter component name" },
+  ];
+  const { directory, name, component } = await inquirer.prompt(questions);
+  createComponent(component, `${directory}/${name}`);
+}
+
+export const createProject = async (directory: string, options: any) => {
+  const PACKAGE_DATA = getContentsUTF8FromDirname("../package.json");
+  const PROJECT_DATA_JSON = JSON.parse(PACKAGE_DATA);
+  const tasks: Listr = new Listr(templateTasks(options));
+  const ctx = { PROJECT_DATA_JSON, directory, templatesFolderDir, templateDir, template: options?.template };
+
+  tasks
+    .run(ctx)
+    .then(() => runServer({ port: 3333 }))
+    .catch((err: any) => console.error(err));
+};
+
+export const createComponent = async (component: string, directory: string, options?: any) => {
+  const args = { r: "route", c: "controller", s: "service", m: "model" };
+  let selectedArgs = args[component.charAt(0)];
+
+  if (!selectedArgs) {
+    const componentList = ["route", "controller", "service", "model"];
+    const question = { type: "list", name: "arg", message: "Choose a component to generate", choices: componentList, default: componentList[0] };
+    const answer = await inquirer.prompt([question]);
+    component = selectedArgs = answer.arg;
+  }
+
+  const choices = ["mongo", "sql"];
   const dir_array = directory.split(/\\|\//);
   const name = dir_array[dir_array.length - 1];
+  const taskList = chooseComponentTask(selectedArgs, directory, name);
+  const tasks: Listr = new Listr(taskList);
+
+  if (selectedArgs === "model" && (!options?.schema || !choices.includes(options?.schema))) {
+    const question = { type: "list", name: "schema", message: "Choose a schema", choices, default: choices[0] };
+    options = await inquirer.prompt([question]);
+  }
+
   const dir = dir_array.reduce((acc: string, cur: string, index: number) => {
     checkCurrentDirectory(acc);
     return `${acc}/${cur}`;
@@ -54,75 +87,30 @@ export const createComponent = (component: string, directory: string, options: a
   const currentDirectory = isRoute ? dir : "src";
   const filename = isRoute ? `/${name}` : `/${directory}`;
   const workingDirectory = checkCurrentDirectory(currentDirectory) + filename;
-  const tasks = chooseComponent(component, directory, name);
 
-  if (tasks) {
-    tasks.run({ directory: workingDirectory, name, schema: options.schema }).catch((err: any) => {
-      console.error(err);
-    });
-  }
+  tasks.run({ directory: workingDirectory, name, noImports: !isRoute, ...options }).catch((err: any) => {
+    console.error(err);
+  });
 };
 
-function chooseComponent(component: string, directory: string, name: string): Listr<any> | null {
-  let tasks: Listr | null = null;
-
-  if (component === "r" || component === "route") {
-    tasks = createRoutesTaskList(directory, name);
-  }
-
-  if (component === "c" || component === "controller") {
-    tasks = createControllerTaskList(directory, name);
-  }
-
-  if (component === "s" || component === "services") {
-    tasks = createServicesTaskList(directory, name);
-  }
-
-  if (component === "m" || component === "model") {
-    tasks = createModelTask(directory, name);
-  }
-
-  return tasks;
-}
-
-function createRoutesTaskList(directory: string, name: string) {
-  const workingDirectory = `src/${directory}/${name}`;
-  return new Listr([
-    { title: taskTitle("create", `${workingDirectory}.controller.ts`), task: createController },
-    { title: taskTitle("create", `${workingDirectory}.service.ts`), task: createServiceTs },
-  ]);
-}
-
-function createControllerTaskList(directory: string, name: string) {
-  return new Listr([{ title: taskTitle("create", `src/${directory}/${name}.controller.ts`), task: createController }]);
-}
-
-function createServicesTaskList(directory: string, name: string) {
-  return new Listr([{ title: taskTitle("create", `src/${directory}/${name}.service.ts`), task: createServiceTs }]);
-}
-
-function createModelTask(directory: string, name: string) {
-  return new Listr([{ title: taskTitle("create", `src/${directory}/${name}.model.ts`), task: createModelTs }]);
+function chooseComponentTask(arg: string, directory: string, name: string) {
+  const task = { controller: createController, service: createServiceTs, model: createModelTs };
+  const create = (arr: string[]) => arr.map((e) => ({ title: taskTitle("create", `src/${directory}/${name}.${e}.ts`), task: task[e] }));
+  return arg === "route" ? create(["controller", "service"]) : create([arg]);
 }
 
 function taskTitle(type: string, value: string) {
-  let title = "";
-
-  if (type === "create") {
-    title = `${chalk.green("create")} ${getCurrentDirectory(value)}`.replace(process.cwd(), "");
-  }
-
-  if (type === "execute") {
-    title = chalk.yellow(value);
-  }
-
-  return title;
+  const title = {
+    create: `${chalk.green("create")} ${getCurrentDirectory(value)}`.replace(process.cwd(), ""),
+    execute: chalk.yellow(value),
+  };
+  return title[type];
 }
 
-export async function runServer(cmd: any, options: any) {
+export async function runServer(cmd: any) {
   try {
     cleanOutDir({ outDir: process.cwd() + "/dist" });
-    serve(cmd.port ? cmd.port : 3333);
+    serve(cmd?.port ? cmd.port : 3333);
   } catch (error) {
     console.log(error.message);
     process.exit();
@@ -143,7 +131,10 @@ export function buildProject() {
     esModuleInterop: true,
   };
 
-  tasks = new Listr([{ title: taskTitle("execute", `Clean dist folder`), task: cleanOutDir }, { title: taskTitle("execute", `Build project`), task: build }]);
+  tasks = new Listr([
+    { title: taskTitle("execute", `Clean dist folder`), task: cleanOutDir },
+    { title: taskTitle("execute", `Build project`), task: build },
+  ]);
 
   tasks.run(options).catch((err: any) => {
     console.error(err);
