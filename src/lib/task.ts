@@ -5,36 +5,13 @@ import { build, cleanOutDir } from "./build";
 import chalk from "chalk";
 import { getContentsUTF8FromDirname, upperCaseWordWithDashes } from "./utils";
 import inquirer from "inquirer";
-import {
-  cloneSelectedTemplate,
-  cloneTemplateRepo,
-  commonExist,
-  defaultTemplate,
-  installDependency,
-  prepareProject,
-  searchTemplates,
-  templateDir,
-  templateExist,
-  updateTemplateFolder,
-  updateTemplateList,
-} from "./template";
+import { templateDir, templatesFolderDir, templateTasks } from "./template";
 
 export const createProject = async (directory: string, options: any) => {
-  const hasTemplateArgs = () => options?.template;
-  const task = [
-    { title: chalk.green(`Updating template folder...`), task: updateTemplateFolder, enabled: commonExist },
-    { title: chalk.green(`Downloading files for creating your MayaJS project...`), task: cloneTemplateRepo, enabled: templateExist },
-    { title: chalk.green(`Updating template list...`), task: updateTemplateList, enabled: hasTemplateArgs },
-    { title: chalk.green(`Searching template list...`), task: searchTemplates, enabled: hasTemplateArgs },
-    { title: chalk.green(`Downloading template files for your project...`), task: cloneSelectedTemplate, enabled: hasTemplateArgs },
-    { title: chalk.green(`Preparing project files and directories...`), task: prepareProject },
-    { title: chalk.green(`Installing project dependencies...`), task: installDependency },
-  ];
-
   const PACKAGE_DATA = getContentsUTF8FromDirname("../package.json");
   const PROJECT_DATA_JSON = JSON.parse(PACKAGE_DATA);
-  const tasks: Listr = new Listr(task);
-  const ctx = { PROJECT_DATA_JSON, directory, templatesFolderDir: templateDir(), templateDir: defaultTemplate, template: options?.template };
+  const tasks: Listr = new Listr(templateTasks(options));
+  const ctx = { PROJECT_DATA_JSON, directory, templatesFolderDir, templateDir, template: options?.template };
 
   tasks
     .run(ctx)
