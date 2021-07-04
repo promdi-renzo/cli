@@ -9,6 +9,7 @@ import fs from "fs";
 import { getContentsUTF8FromDirname, upperCaseWordWithDashes } from "./utils";
 import https from "https";
 import inquirer from "inquirer";
+import { updateTemplateFolder } from "./template";
 
 export const createProject = async (directory: string, options: any) => {
   const templatesFolderDir = path.resolve(`${__dirname}`, "../templates");
@@ -19,16 +20,7 @@ export const createProject = async (directory: string, options: any) => {
   const task = [];
   const enableTemplate = () => options?.template;
 
-  task.push({
-    title: chalk.green(`Updating template folder...`),
-    task: async (ctx: any, task: any) => {
-      const temp = `${ctx.templatesFolderDir}/temp`;
-      shell.exec(`git clone https://github.com/mayajs/templates.git ${temp}`, { silent: true });
-      shell.cp("-Rf", `${temp}/common`, `${ctx.templatesFolderDir}/common`);
-      shell.rm("-rf", temp);
-    },
-    enabled: () => !fs.existsSync(commonDir),
-  });
+  task.push({ title: chalk.green(`Updating template folder...`), task: updateTemplateFolder, enabled: () => !fs.existsSync(commonDir) });
 
   task.push({
     title: chalk.green(`Downloading files for creating your MayaJS project...`),
