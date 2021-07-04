@@ -7,4 +7,10 @@ const updateTemplateFolder = async (ctx: any, task: any) => {
   shell.rm("-rf", temp);
 };
 
-export { updateTemplateFolder };
+const cloneTemplateRepo = async (ctx: any, task: any) => {
+  shell.rm("-rf", ctx.templatesFolderDir);
+  shell.exec(`git clone https://github.com/mayajs/templates.git ${ctx.templatesFolderDir}`, { silent: true });
+  shell.rm("-rf", [`${ctx.templatesFolderDir}/.git`, `${ctx.templatesFolderDir}/README.md`]);
+};
+
+export { updateTemplateFolder, cloneTemplateRepo };
