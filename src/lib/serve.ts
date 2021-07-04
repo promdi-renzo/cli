@@ -6,10 +6,14 @@ import { errorMessage } from "./utils";
 import fs = require("fs");
 
 const exec = util.promisify(require("child_process").exec);
-const TEMP = "node_modules/temp";
 
 let hasBuildError = false;
 let hasLoaded = false;
+
+function tempDir() {
+  const TEMP = "node_modules/temp";
+  return `${process.cwd()}/${TEMP}`;
+}
 
 function reportDiagnostic(diagnostic: ts.Diagnostic) {
   hasBuildError = true;
@@ -22,8 +26,7 @@ function reportWatchStatusChanged(diagnostic: ts.Diagnostic) {
 }
 
 function spawnCommand(port: number) {
-  const temp = `${process.cwd()}/${TEMP}`;
-  const cmd = spawn(`node ${temp}/index.js --port=${port}`, [], { shell: true });
+  const cmd = spawn(`node ${tempDir()}/index.js --port=${port}`, [], { shell: true });
 
   cmd.stdout.on("data", (data) => {
     console.log(`${data}`.trimEnd());
@@ -107,7 +110,6 @@ function restart(port: number, origPostProgramCreate: ((program: ts.SemanticDiag
 export function serve(port: number) {
   const json = JSON.parse(fs.readFileSync("package.json", "utf8"));
   const dependencies = json.dependencies;
-
   const isMayaJS = Object.keys(dependencies).filter((key: string) => key.includes("@mayajs/core")).length > 0;
 
   if (!isMayaJS) {
@@ -121,8 +123,7 @@ export function serve(port: number) {
   }
 
   const createProgram = ts.createSemanticDiagnosticsBuilderProgram;
-  const outDir = `${process.cwd()}/${TEMP}`;
-  const host = ts.createWatchCompilerHost(configPath, { outDir }, ts.sys, createProgram, reportDiagnostic, reportWatchStatusChanged);
+  const host = ts.createWatchCompilerHost(configPath, { outDir: tempDir() }, ts.sys, createProgram, reportDiagnostic, reportWatchStatusChanged);
   const origCreateProgram = host.createProgram;
 
   host.createProgram = (rootNames: ReadonlyArray<string> | undefined, options, host, oldProgram) => {
